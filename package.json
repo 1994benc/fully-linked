@@ -1,7 +1,7 @@
 {
   "name": "fully-linked",
   "version": "1.0.0",
-  "source": "src/index.html",
+  "source": "src/example.html",
   "author": "Ben Chomsang",
   "license": "MIT",
   "private": false,

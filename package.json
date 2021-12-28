@@ -1,0 +1,20 @@
+{
+  "name": "fully-linked",
+  "version": "1.0.0",
+  "source": "src/index.html",
+  "author": "Ben Chomsang",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "@types/d3": "^7.1.0",
+    "parcel": "^2.0.1"
+  },
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build"
+  },
+  "dependencies": {
+    "@antv/g6": "^4.5.1",
+    "d3": "^7.2.1"
+  }
+}

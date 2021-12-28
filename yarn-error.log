@@ -1,0 +1,41 @@
+Arguments: 
+  /Users/benchomsang/.nvm/versions/node/v17.2.0/bin/node /Users/benchomsang/.nvm/versions/node/v17.2.0/bin/yarn add --dev parcel
+
+PATH: 
+  /Users/benchomsang/.nvm/versions/node/v17.2.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/Library/Apple/usr/bin:/Users/benchomsang/.nvm/versions/node/v17.2.0/bin:/Users/benchomsang/miniforge3/bin:/Users/benchomsang/miniforge3/condabin:/opt/homebrew/bin:/opt/homebrew/sbin
+
+Yarn version: 
+  1.22.17
+
+Node version: 
+  17.2.0
+
+Platform: 
+  darwin arm64
+
+Trace: 
+  Error: connect ENETUNREACH 104.16.19.35:443 - Local (0.0.0.0:50256)
+      at internalConnect (node:net:931:16)
+      at defaultTriggerAsyncIdScope (node:internal/async_hooks:456:18)
+      at emitLookup (node:net:1075:9)
+      at /Users/benchomsang/.nvm/versions/node/v17.2.0/lib/node_modules/yarn/lib/cli.js:107658:28
+      at /Users/benchomsang/.nvm/versions/node/v17.2.0/lib/node_modules/yarn/lib/cli.js:107567:13
+      at RawTask.module.exports.RawTask.call (/Users/benchomsang/.nvm/versions/node/v17.2.0/lib/node_modules/yarn/lib/cli.js:83655:19)
+      at flush (/Users/benchomsang/.nvm/versions/node/v17.2.0/lib/node_modules/yarn/lib/cli.js:83737:29)
+      at processTicksAndRejections (node:internal/process/task_queues:78:11)
+
+npm manifest: 
+  {
+    "name": "fully-linked",
+    "version": "1.0.0",
+    "main": "src/index.html",
+    "author": "Ben Chomsang",
+    "license": "MIT",
+    "private": false
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

@@ -19,7 +19,7 @@
 1. First, install the library
 
 ```bash
-npm install fulllinked
+npm install fully-linked
 ```
 
 2. Then import it

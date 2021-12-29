@@ -41,7 +41,9 @@ export class FullyLinked<NodeType, EdgeType> {
     this._disposer.add({
       dispose: () => {
         this._options = null;
-        this._container?.remove();
+        this._container?.childNodes.forEach((child) => {
+          child.remove()
+        });
         this._container = null;
       },
     });

@@ -31,7 +31,7 @@ function NodeComponent(props: { node: InternalNode<MyNodeType> }) {
         overflow: "hidden"
       }}
     >
-      <div style={{ padding: "15px" }}>{props.node.data.label}</div>
+      <div style={{ padding: "15px" }}>Name: {props.node.data.label}</div>
       <div style={{ width: "100%", height: "100px", overflow: "hidden", flex: "3" }}>
         <img
           src={props.node.data.imageUrl}

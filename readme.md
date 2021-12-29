@@ -1,4 +1,4 @@
-# FullLinked 
+# FullyLinked 
 ## A simple library for visualising graphs using DOM elements
 
 

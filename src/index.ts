@@ -158,7 +158,6 @@ export class FullyLinked<NodeType, EdgeType> {
   }
 
   // SECTION private methods:
-
   private setupCanvasZooming() {
     const zoom = d3.zoom<any, any>();
     zoom.on("zoom", (e) => {

@@ -1,6 +1,6 @@
 {
   "name": "fully-linked",
-  "version": "1.0.26",
+  "version": "1.0.27",
   "source": "src/index.ts",
   "author": "Ben Chomsang",
   "type": "module",

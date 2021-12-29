@@ -1,5 +1,5 @@
 
-import { InternalNode } from "../fully-linked/Node";
+import { InternalNode } from "../common/item/node/types/Node";
 import { FullyLinked } from "../index";
 
 interface MyNodeDataType {

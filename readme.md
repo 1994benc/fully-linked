@@ -18,8 +18,6 @@
   - 🎉 `nodeDrag`: when a node is dragged
   - 🎉 `nodeDragEnd`: when a node is dropped
   - 🎉 `edgeClick`: when an edge is clicked
-  - 🎉 `edgeDrag`: when an edge is dragged
-  - 🎉 `edgeDragEnd`: when an edge is dropped
   - 🎉 `canvasClick`: when the canvas is clicked
   - 🎉 `canvasDrag`: when the canvas is dragged
   - 🎉 `canvasDragEnd`: when the canvas is dropped

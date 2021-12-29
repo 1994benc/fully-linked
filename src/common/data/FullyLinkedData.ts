@@ -1,5 +1,5 @@
-import { Edge } from "./Edge";
-import { InternalNode, Node } from "./Node";
+import { Edge } from "../item/edge/types/Edge";
+import { InternalNode, Node } from "../item/node/types/Node";
 
 export interface FullyLinkedData<NodeType, EdgeType> {
   id: string;

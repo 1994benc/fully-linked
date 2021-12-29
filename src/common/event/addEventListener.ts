@@ -1,8 +1,9 @@
-import { Disposer } from "../../fully-linked/Disposer";
+import { Disposer } from "../disposer/Disposer";
+import { FullyLinkedEventEnum } from "./FullyLinkedEventEnum";
 
-export const addEventListener = (
+export const addDisposableEventListener = (
   element: HTMLElement | Document,
-  eventName: keyof HTMLElementEventMap,
+  eventName: keyof HTMLElementEventMap | FullyLinkedEventEnum,
   eventListener: EventListener,
   disposer: Disposer
 ) => {

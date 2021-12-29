@@ -29,14 +29,32 @@ import { FullLinked } from 'fulllinked'
 
 3. Use it
 ```typescript
+
+// Create an interface for our node data
+interface MyNodeDataType {
+  id: string;
+  label: string;
+}
+
+// Create an interface for our edge data
+interface MyEdgeDataType {
+  id: string;
+  label: string;
+}
+
+
 // Get the container element. This can be any HTML div element. 
 // It must have a width and height so that the graph can be visible.
 const container = document.getElementById("container");
 if (!container) {
     // ... handle container not found
 }
+
+// Create a new FullLinked instance
 const fl = new FullyLinked<MyNodeDataType, MyEdgeDataType>({
+  // Each graph must have a unique ID
   id: "my-fl-graph",
+  // The container element must be passed in
   container,
 });
 

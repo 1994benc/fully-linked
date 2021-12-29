@@ -23,11 +23,17 @@
   },
   "scripts": {
     "start": "parcel",
-    "start:example": "parcel src/example/example.html",
+    "start:example": "parcel src/example/simple/example.html",
+    "start:react-example": "parcel src/example/react/example.html",
+
     "build": "rm -rf dist && parcel build"
   },
   "dependencies": {
     "@antv/g6": "^4.5.1",
-    "d3": "^7.2.1"
+    "@types/react": "^17.0.38",
+    "@types/react-dom": "^17.0.11",
+    "d3": "^7.2.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
   }
 }

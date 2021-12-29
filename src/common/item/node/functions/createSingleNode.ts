@@ -6,6 +6,8 @@ import { Edge } from "../../edge/types/Edge";
 import { createLinkAnchorElement } from "./createLinkAnchorElement";
 import { InternalNode } from "../types/Node";
 import { setupNodeDragging } from "./setupNodeDragging";
+import { ReactElement } from "react";
+import * as ReactDOM from "react-dom";
 
 export interface CreateSingleNodeParams<NodeType, EdgeType> {
   node: InternalNode<NodeType>;
@@ -36,15 +38,8 @@ export function createSingleNode<NodeType, EdgeType>({
   edgesMapById,
   edgesMapByNodeId,
 }: CreateSingleNodeParams<NodeType, EdgeType>) {
-  let nodeElement: HTMLElement;
+  let nodeElement: HTMLElement | ReactElement;
   let nodeElementWrapper: HTMLElement = document.createElement("div");
-  if (node.customNodeElement) {
-    nodeElement = node.customNodeElement(node);
-  } else {
-    nodeElement = document.createElement("div");
-    nodeElement.classList.add("fully-linked-node");
-    nodeElement.innerText = node.id;
-  }
   nodeElementWrapper.style.position = "absolute";
   nodeElementWrapper.style.width = node.width + 'px';
   nodeElementWrapper.style.height = node.height + 'px';
@@ -54,7 +49,21 @@ export function createSingleNode<NodeType, EdgeType>({
   nodeElementWrapper.style.cursor = "grab";
   nodeElementWrapper.setAttribute("data-node-id", node.id);
   nodeElementWrapper.classList.add("fully-linked-node-wrapper");
-  nodeElementWrapper.appendChild(nodeElement);
+
+  if (node.customNodeElementAsReactComponent) {
+    nodeElement = node.customNodeElementAsReactComponent(node);
+    // TODO: append react element
+    ReactDOM.render(nodeElement, nodeElementWrapper);
+  }
+  else if (node.customNodeElement) {
+    nodeElement = node.customNodeElement(node);
+    nodeElementWrapper.appendChild(nodeElement as HTMLElement);
+  } else {
+    nodeElement = document.createElement("div");
+    nodeElement.classList.add("fully-linked-node");
+    nodeElement.innerText = node.id;
+    nodeElementWrapper.appendChild(nodeElement);
+  }
   
 
   // Create anchor point elements

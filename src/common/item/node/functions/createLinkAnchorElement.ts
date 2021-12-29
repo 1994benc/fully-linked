@@ -24,6 +24,7 @@ export function createLinkAnchorElement<NodeType, EdgeType>(
   anchorStartElem.style.left = node.startAnchorPoint?.x + "px";
   anchorStartElem.style.top = node.startAnchorPoint?.y + "px";
   anchorStartElem.classList.add("anchor-point-element");
+  anchorStartElem.classList.add("anchor-start-element");
   anchorStartElem.style.transform = "translate(-50%, -50%)";
   anchorStartElem.style.background = "black";
   anchorStartElem.style.width = "20px";
@@ -34,6 +35,8 @@ export function createLinkAnchorElement<NodeType, EdgeType>(
   anchorEndElem.style.left = node.endAnchorPoint?.x + "px";
   anchorEndElem.style.top = node.endAnchorPoint?.y + "px";
   anchorEndElem.classList.add("anchor-point-element");
+  anchorEndElem.classList.add("anchor-end-element");
+
   anchorEndElem.style.transform = "translate(-50%, -50%)";
   anchorEndElem.style.background = "black";
   anchorEndElem.style.width = "20px";

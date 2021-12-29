@@ -9,7 +9,7 @@
 - ✅ Draggable nodes
 - ✅ Add edges dynamically with drag & drop
 - ✅ Zoomable & draggable canvas
-- ✅ Nodes can be any HTML elements (e.g. `<div>` or `<img>`)
+- ✅ Nodes can be any HTML elements (e.g. `<div>` or `<img>`) or even a React component
 - ✅ Add nodes dynamically with drag & drop (coming soon)
 - ✅ Extend with graph layouts, including DAG, force-directed, or a custom layout (coming soon)
 - ✅ Customizable edge styles (coming soon)

@@ -1,6 +1,6 @@
 
-import { InternalNode } from "../common/item/node/types/Node";
-import { FullyLinked } from "../index";
+import { InternalNode } from "../../common/item/node/types/Node";
+import { FullyLinked } from "../../index";
 
 interface MyNodeDataType {
   id: string;
@@ -39,7 +39,7 @@ fullyLinked.setData({
       x: 50,
       y: 50,
       data: { id: "1", label: "Node 1" },
-      customNodeElement: getNodeElement
+      customNodeElement: getNodeElement,
     },
     {
       id: "2",
@@ -48,34 +48,34 @@ fullyLinked.setData({
       x: 500,
       y: 250,
       data: { id: "2", label: "Node 2" },
-      customNodeElement: getNodeElement
+      customNodeElement: getNodeElement,
     },
     {
       id: "3",
       width: 300,
       height: 80,
-      x: 50,
+      x: 1000,
       y: 450,
       data: { id: "3", label: "Node 3" },
-      customNodeElement: getNodeElement
+      customNodeElement: getNodeElement,
     },
     {
       id: "4",
       width: 300,
       height: 80,
-      x: 50,
+      x: 1000,
       y: 650,
       data: { id: "4", label: "Node 4" },
-      customNodeElement: getNodeElement
+      customNodeElement: getNodeElement,
     },
     {
       id: "5",
       width: 300,
       height: 80,
-      x: 50,
+      x: 1600,
       y: 850,
       data: { id: "5", label: "Node 5" },
-      customNodeElement: getNodeElement
+      customNodeElement: getNodeElement,
     },
     {
       id: "6",
@@ -84,8 +84,8 @@ fullyLinked.setData({
       x: 50,
       y: 1000,
       data: { id: "6", label: "Node 6" },
-      customNodeElement: getNodeElement
-    }
+      customNodeElement: getNodeElement,
+    },
   ],
   edges: [
     { id: "1", source: "1", target: "2", data: { id: "1", label: "Edge 1" } },

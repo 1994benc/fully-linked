@@ -37,22 +37,24 @@ export function createSingleNode<NodeType, EdgeType>({
   edgesMapByNodeId,
 }: CreateSingleNodeParams<NodeType, EdgeType>) {
   let nodeElement: HTMLElement;
+  let nodeElementWrapper: HTMLElement = document.createElement("div");
   if (node.customNodeElement) {
     nodeElement = node.customNodeElement(node);
   } else {
     nodeElement = document.createElement("div");
     nodeElement.classList.add("fully-linked-node");
-  }
-  nodeElement.style.position = "absolute";
-  nodeElement.style.left = `${node.x}px`;
-  nodeElement.style.top = `${node.y}px`;
-  nodeElement.style.transformOrigin = "center";
-  nodeElement.style.cursor = "grab";
-  nodeElement.setAttribute("data-node-id", node.id);
-
-  if (!node.customNodeElement) {
     nodeElement.innerText = node.id;
   }
+  nodeElementWrapper.style.position = "absolute";
+  nodeElementWrapper.style.width = node.width + 'px';
+  nodeElementWrapper.style.height = node.height + 'px';
+  nodeElementWrapper.style.left = `${node.x}px`;
+  nodeElementWrapper.style.top = `${node.y}px`;
+  nodeElementWrapper.style.transformOrigin = "center";
+  nodeElementWrapper.style.cursor = "grab";
+  nodeElementWrapper.setAttribute("data-node-id", node.id);
+  nodeElementWrapper.appendChild(nodeElement);
+  
 
   // Create anchor point elements
   const { anchorStartElem, anchorEndElem } = createLinkAnchorElement(
@@ -73,7 +75,7 @@ export function createSingleNode<NodeType, EdgeType>({
 
   if (options?.allowDragNodes === undefined || options?.allowDragNodes) {
     setupNodeDragging({
-      nodeElement,
+      nodeElement: nodeElementWrapper,
       anchorStartElement: anchorStartElem,
       anchorEndElement: anchorEndElem,
       node,
@@ -85,5 +87,5 @@ export function createSingleNode<NodeType, EdgeType>({
     });
   }
 
-  innerContainer.appendChild(nodeElement);
+  innerContainer.appendChild(nodeElementWrapper);
 }

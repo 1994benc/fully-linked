@@ -490,7 +490,7 @@ export class FullyLinked<NodeType, EdgeType> {
         }
       }
     };
-    nodeElement.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mousemove", onMouseMove);
     const onMouseUp = (e: MouseEvent): void => {
       dragging = false;
       objInitLeft = null;
@@ -507,7 +507,7 @@ export class FullyLinked<NodeType, EdgeType> {
     this._disposer.add({
       dispose: () => {
         nodeElement.removeEventListener("mousedown", onMouseDown);
-        nodeElement.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mousemove", onMouseMove);
         document.removeEventListener("mouseup", onMouseUp);
       },
     });

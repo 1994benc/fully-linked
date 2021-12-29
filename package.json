@@ -4,6 +4,11 @@
   "source": "src/index.ts",
   "author": "Ben Chomsang",
   "type": "module",
+  "homepage": "https://github.com/1994benc/fullylinked",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/1994benc/fullylinked.git"
+  },
   "main": "dist/main.js",
   "module": "dist/module.js",
   "types": "dist/types.d.ts",

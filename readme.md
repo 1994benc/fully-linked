@@ -2,6 +2,7 @@
 ## A simple library for visualising graphs using DOM elements
 
 
+
 ### 🎉 Features
 
 - ✅ Written with [TypeScript](https://www.typescriptlang.org/) so it is type-safe
@@ -12,9 +13,10 @@
 - ✅ Add nodes dynamically with drag & drop (coming soon)
 - ✅ Extend with graph layouts, including DAG, force-directed, or a custom layout (coming soon)
 
+### 🔀 Example FullyLinked Graph
+![Example FullyLinked Graph](src/example/example.png)
 
-
-### Use it in your application
+### ℹ️ Get started
 
 1. First, install the library
 

@@ -24,7 +24,7 @@ npm install fully-linked
 
 2. Then import it
 ```typescript
-import { FullLinked } from 'fulllinked'
+import { FullLinked } from 'fully-linked'
 ```
 
 3. Use it

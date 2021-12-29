@@ -65,6 +65,10 @@ export class FullyLinked<NodeType, EdgeType> {
     }
 
     for (const edge of internalData.edges) {
+      if (!this._nodeMapById.get(edge.source) || !this._nodeMapById.get(edge.target)) {
+        // Target or source node does not exist. Skip this edge and continue without throwing an error.
+        continue;
+      }
       this._edgeMapById.set(edge.id, edge);
       if (!this._edgeListMapByNodeId.has(edge.source)) {
         this._edgeListMapByNodeId.set(edge.source, [edge]);

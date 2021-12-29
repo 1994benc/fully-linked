@@ -37,7 +37,7 @@ export function setUpCreateEdgeOnAnchorDragging<NodeType, EdgeType>({
   container,
   edgeMapById: edgesMapById,
   edgeListMapByNodeId: edgesMapByNodeId,
-  nodeMapById: nodesMapById
+  nodeMapById: nodesMapById,
 }: CreateEdgeOnAnchorDraggingParams<NodeType, EdgeType>) {
   // Positions
   let dragStartX: number;
@@ -69,25 +69,25 @@ export function setUpCreateEdgeOnAnchorDragging<NodeType, EdgeType>({
     ] as [number, number][];
     linkGen.curve(curveBumpX);
     const d = linkGen(singleLinkData);
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    if (!d) {
-      throw new Error("No path could be generated");
+
+    if (d) {
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", d);
+      path.setAttribute("stroke", "black");
+      path.setAttribute("stroke-width", "1");
+      path.setAttribute("fill", "none");
+      path.setAttribute("data-edge-id", edgePlaceholderId);
+
+      // Set initial positions
+      objInitTop = anchorEndElem.offsetTop;
+      objInitLeft = anchorEndElem.offsetLeft;
+      dragStartX = e.pageX;
+      dragStartY = e.pageY;
+
+      svg?.appendChild(path);
+      createNewEdgeStateMaintainer.creatingNewEdge = true;
+      createNewEdgeStateMaintainer.newEdgeMetadata.source = node.id;
     }
-    path.setAttribute("d", d);
-    path.setAttribute("stroke", "black");
-    path.setAttribute("stroke-width", "1");
-    path.setAttribute("fill", "none");
-    path.setAttribute("data-edge-id", edgePlaceholderId);
-
-    // Set initial positions
-    objInitTop = anchorEndElem.offsetTop;
-    objInitLeft = anchorEndElem.offsetLeft;
-    dragStartX = e.pageX;
-    dragStartY = e.pageY;
-
-    svg?.appendChild(path);
-    createNewEdgeStateMaintainer.creatingNewEdge = true;
-    createNewEdgeStateMaintainer.newEdgeMetadata.source = node.id;
   };
   addDisposableEventListener(
     anchorEndElem,
@@ -123,10 +123,9 @@ export function setUpCreateEdgeOnAnchorDragging<NodeType, EdgeType>({
       const path = svg?.querySelector(
         `path[data-edge-id="${edgePlaceholderId}"]`
       ) as SVGElement;
-      if (!d) {
-        throw new Error("No path found");
+      if (d) {
+        path.setAttribute("d", d);
       }
-      path.setAttribute("d", d);
     }
   };
   if (!container) {
@@ -154,7 +153,12 @@ export function setUpCreateEdgeOnAnchorDragging<NodeType, EdgeType>({
   if (!container) {
     throw new Error("No container found");
   }
-  addDisposableEventListener(container, "mouseup", anchorEndMouseUpListener, disposer);
+  addDisposableEventListener(
+    container,
+    "mouseup",
+    anchorEndMouseUpListener,
+    disposer
+  );
 
   setUpEdgeCreationDropZone(
     anchorStartElem,

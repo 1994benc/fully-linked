@@ -176,6 +176,12 @@ export function App() {
           target: "5",
           data: { id: "4", label: "Edge 4" },
         },
+        {
+          id: "5",
+          source: "4",
+          target: "50",
+          data: { id: "5", label: "Edge 5" },
+        },
       ],
       id: "test",
     });

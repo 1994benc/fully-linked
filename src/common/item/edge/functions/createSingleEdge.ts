@@ -18,6 +18,12 @@ export function createSingleEdge<NodeType, EdgeType>({
   edgesMapById,
   edgesMapByNodeId,
 }: SingleEdgeCreationParams<EdgeType, NodeType>): void {
+  const sourceNode = nodesMapById.get(edge.source);
+  const targetNode = nodesMapById.get(edge.target);
+  if (!sourceNode || !targetNode) {
+    // Ignore this edge without throwing an error
+    return;
+  }
   edgesMapById.set(edge.id, edge);
   edgesMapByNodeId.get(edge.source);
   if (!edgesMapByNodeId.has(edge.source)) {
@@ -36,11 +42,8 @@ export function createSingleEdge<NodeType, EdgeType>({
     existingEdgeElement.remove();
   }
   const d = getEdgePathDValue(nodesMapById, edge);
-  if (!d) {
-    return;
-  }
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
   if (d) {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute("d", d);
     path.setAttribute("stroke", "black");
     path.setAttribute("stroke-width", "1");

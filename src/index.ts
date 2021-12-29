@@ -1,23 +1,26 @@
-import { Disposer } from "./Disposer";
-import { FullyLinkedData, InternalFullyLinkedData } from "./FullyLinkedData";
-import { FullyLinkedOptions } from "./FullyLinkedOptions";
-import { InternalNode, Node } from "./Node";
+import { Disposer } from "./fully-linked/Disposer";
+import {
+  FullyLinkedData,
+  InternalFullyLinkedData,
+} from "./fully-linked/FullyLinkedData";
+import { FullyLinkedOptions } from "./fully-linked/FullyLinkedOptions";
+import { InternalNode, Node } from "./fully-linked/Node";
 import * as d3 from "d3";
-import { Edge } from "./Edge";
+import { Edge } from "./fully-linked/Edge";
 import { curveBumpX } from "d3";
-import { addEventListener } from "../utils/event/addEventListener";
+import { addEventListener } from "./utils/event/addEventListener";
 const edgePlaceholderId = "placeholder-edge";
 
 export class FullyLinked<NodeType, EdgeType> {
-  private _container: HTMLElement;
-  private _options: FullyLinkedOptions;
+  private _container: HTMLElement | null;
+  private _options: FullyLinkedOptions | null;
   private _disposer: Disposer;
-  private _svg: SVGSVGElement;
+  private _svg: SVGSVGElement | undefined;
   private _nodesMapById: Map<string, InternalNode<NodeType>> = new Map();
   private _edgesMapById: Map<string, Edge<EdgeType>> = new Map();
   /** key is a nodeId and values are edges that are linked to the node */
   private _edgesMapByNodeId: Map<string, Edge<EdgeType>[]> = new Map();
-  private _innerContainer: HTMLDivElement;
+  private _innerContainer: HTMLDivElement | undefined;
   private _zoomLevel: number = 1;
   private _creatingNewEdge: boolean = false;
   private _newEdgeBeingCreatedMetadata: {
@@ -35,7 +38,7 @@ export class FullyLinked<NodeType, EdgeType> {
     this._disposer.add({
       dispose: () => {
         this._options = null;
-        this._container.remove();
+        this._container?.remove();
         this._container = null;
       },
     });
@@ -55,12 +58,12 @@ export class FullyLinked<NodeType, EdgeType> {
       if (!this._edgesMapByNodeId.has(edge.source)) {
         this._edgesMapByNodeId.set(edge.source, [edge]);
       } else {
-        this._edgesMapByNodeId.get(edge.source).push(edge);
+        this._edgesMapByNodeId.get(edge.source)?.push(edge);
       }
       if (!this._edgesMapByNodeId.has(edge.target)) {
         this._edgesMapByNodeId.set(edge.target, [edge]);
       } else {
-        this._edgesMapByNodeId.get(edge.target).push(edge);
+        this._edgesMapByNodeId.get(edge.target)?.push(edge);
       }
     }
   }
@@ -89,7 +92,7 @@ export class FullyLinked<NodeType, EdgeType> {
 
     this._container.appendChild(this._innerContainer);
     this._svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    this._svg.classList.add("fully-linked-svg-" + this._options.id);
+    this._svg.classList.add("fully-linked-svg-" + this._options?.id);
     this._svg.style.position = "absolute";
     this._svg.style.top = "0";
     this._svg.style.left = "0";
@@ -99,7 +102,7 @@ export class FullyLinked<NodeType, EdgeType> {
     this._innerContainer.appendChild(this._svg);
     this._disposer.add({
       dispose: () => {
-        this._svg.remove();
+        this._svg?.remove();
       },
     });
 
@@ -116,12 +119,12 @@ export class FullyLinked<NodeType, EdgeType> {
     if (!this._edgesMapByNodeId.has(edge.source)) {
       this._edgesMapByNodeId.set(edge.source, [edge]);
     } else {
-      this._edgesMapByNodeId.get(edge.source).push(edge);
+      this._edgesMapByNodeId.get(edge.source)?.push(edge);
     }
     if (!this._edgesMapByNodeId.has(edge.target)) {
       this._edgesMapByNodeId.set(edge.target, [edge]);
     } else {
-      this._edgesMapByNodeId.get(edge.target).push(edge);
+      this._edgesMapByNodeId.get(edge.target)?.push(edge);
     }
 
     const existingEdgeElement = this.getEdgeElement(edge.id);
@@ -139,7 +142,7 @@ export class FullyLinked<NodeType, EdgeType> {
   }
 
   private getEdgeElement(id: string) {
-    return this._svg.querySelector(`path[data-edge-id="${id}"]`) as SVGElement;
+    return this._svg?.querySelector(`path[data-edge-id="${id}"]`) as SVGElement;
   }
 
   /** Checks that a node exists. This checks the actual element in the DOM not just in the data */
@@ -149,7 +152,7 @@ export class FullyLinked<NodeType, EdgeType> {
   }
 
   private getNodeElement(id: string) {
-    return this._container.querySelector(
+    return this._container?.querySelector(
       `[data-node-id="${id}"]`
     ) as SVGElement;
   }
@@ -160,7 +163,9 @@ export class FullyLinked<NodeType, EdgeType> {
     const zoom = d3.zoom<any, any>();
     zoom.on("zoom", (e) => {
       this._zoomLevel = e.transform.k;
-      this._innerContainer.style.transform = `translate(${e.transform.x}px, ${e.transform.y}px) scale(${e.transform.k})`;
+      if (this._innerContainer) {
+        this._innerContainer.style.transform = `translate(${e.transform.x}px, ${e.transform.y}px) scale(${e.transform.k})`;
+      }
     });
     d3.select(this._container).call(zoom);
   }
@@ -174,12 +179,14 @@ export class FullyLinked<NodeType, EdgeType> {
   private createSingleEdge(edge: Edge<EdgeType>) {
     const d = this.getEdgePathDValue(edge);
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", d);
-    path.setAttribute("stroke", "black");
-    path.setAttribute("stroke-width", "1");
-    path.setAttribute("fill", "none");
-    path.setAttribute("data-edge-id", edge.id);
-    this._svg.appendChild(path);
+    if (d) {
+      path.setAttribute("d", d);
+      path.setAttribute("stroke", "black");
+      path.setAttribute("stroke-width", "1");
+      path.setAttribute("fill", "none");
+      path.setAttribute("data-edge-id", edge.id);
+      this._svg?.appendChild(path);
+    }
   }
 
   private getEdgePathDValue(edge: Edge<EdgeType>) {
@@ -235,12 +242,12 @@ export class FullyLinked<NodeType, EdgeType> {
       const { anchorStartElem, anchorEndElem } =
         this.createLinkAnchorElement(node);
 
-      this._innerContainer.appendChild(anchorStartElem);
-      this._innerContainer.appendChild(anchorEndElem);
+      this._innerContainer?.appendChild(anchorStartElem);
+      this._innerContainer?.appendChild(anchorEndElem);
 
       if (
-        this._options.allowDragNodes === undefined ||
-        this._options.allowDragNodes
+        this._options?.allowDragNodes === undefined ||
+        this._options?.allowDragNodes
       ) {
         this.setupNodeDragging(
           nodeElement,
@@ -250,7 +257,7 @@ export class FullyLinked<NodeType, EdgeType> {
         );
       }
 
-      this._innerContainer.appendChild(nodeElement);
+      this._innerContainer?.appendChild(nodeElement);
     }
   }
 
@@ -259,8 +266,8 @@ export class FullyLinked<NodeType, EdgeType> {
     const anchorEndElem = document.createElement("div");
 
     anchorStartElem.style.position = "absolute";
-    anchorStartElem.style.left = node.startAnchorPoint.x + "px";
-    anchorStartElem.style.top = node.startAnchorPoint.y + "px";
+    anchorStartElem.style.left = node.startAnchorPoint?.x + "px";
+    anchorStartElem.style.top = node.startAnchorPoint?.y + "px";
     anchorStartElem.classList.add("anchor-point-element");
     anchorStartElem.style.transform = "translate(-50%, -50%)";
     anchorStartElem.style.background = "black";
@@ -269,8 +276,8 @@ export class FullyLinked<NodeType, EdgeType> {
     anchorStartElem.setAttribute("data-node-id", node.id);
 
     anchorEndElem.style.position = "absolute";
-    anchorEndElem.style.left = node.endAnchorPoint.x + "px";
-    anchorEndElem.style.top = node.endAnchorPoint.y + "px";
+    anchorEndElem.style.left = node.endAnchorPoint?.x + "px";
+    anchorEndElem.style.top = node.endAnchorPoint?.y + "px";
     anchorEndElem.classList.add("anchor-point-element");
     anchorEndElem.style.transform = "translate(-50%, -50%)";
     anchorEndElem.style.background = "black";
@@ -307,15 +314,15 @@ export class FullyLinked<NodeType, EdgeType> {
         anchorEndElem
       );
       // remove any old placeholder paths if exist
-      const oldPath = this._svg.querySelector(
+      const oldPath = this._svg?.querySelector(
         `path[data-edge-id="${edgePlaceholderId}"]`
       ) as SVGElement;
       oldPath?.remove();
 
       const linkGen = d3.line();
       const singleLinkData = [
-        [node.endAnchorPoint.x, node.endAnchorPoint.y],
-        [node.endAnchorPoint.x, node.endAnchorPoint.y],
+        [node.endAnchorPoint?.x, node.endAnchorPoint?.y],
+        [node.endAnchorPoint?.x, node.endAnchorPoint?.y],
       ] as [number, number][];
       linkGen.curve(curveBumpX);
       const d = linkGen(singleLinkData);
@@ -323,6 +330,9 @@ export class FullyLinked<NodeType, EdgeType> {
         "http://www.w3.org/2000/svg",
         "path"
       );
+      if (!d) {
+        throw new Error("No path could be generated");
+      }
       path.setAttribute("d", d);
       path.setAttribute("stroke", "black");
       path.setAttribute("stroke-width", "1");
@@ -335,7 +345,7 @@ export class FullyLinked<NodeType, EdgeType> {
       dragStartX = e.pageX;
       dragStartY = e.pageY;
 
-      this._svg.appendChild(path);
+      this._svg?.appendChild(path);
       this._creatingNewEdge = true;
       this._newEdgeBeingCreatedMetadata.source = node.id;
     };
@@ -365,17 +375,23 @@ export class FullyLinked<NodeType, EdgeType> {
 
         const linkGen = d3.line();
         const singleLinkData = [
-          [node.endAnchorPoint.x, node.endAnchorPoint.y],
+          [node.endAnchorPoint?.x, node.endAnchorPoint?.y],
           [x, y],
         ] as [number, number][];
         linkGen.curve(curveBumpX);
         const d = linkGen(singleLinkData);
-        const path = this._svg.querySelector(
+        const path = this._svg?.querySelector(
           `path[data-edge-id="${edgePlaceholderId}"]`
         ) as SVGElement;
+        if (!d) {
+          throw new Error("No path found");
+        }
         path.setAttribute("d", d);
       }
     };
+    if (!this._container) {
+      throw new Error("No container found");
+    }
     addEventListener(
       this._container,
       "mousemove",
@@ -386,7 +402,7 @@ export class FullyLinked<NodeType, EdgeType> {
     const anchorEndMouseUpListener = (e: Event) => {
       this._creatingNewEdge = false;
       // remove placeholder edge
-      const path = this._svg.querySelector(
+      const path = this._svg?.querySelector(
         `path[data-edge-id="${edgePlaceholderId}"]`
       ) as SVGElement;
       path?.remove();
@@ -395,6 +411,9 @@ export class FullyLinked<NodeType, EdgeType> {
       this._newEdgeBeingCreatedMetadata.source = null;
       this._newEdgeBeingCreatedMetadata.target = null;
     };
+    if (!this._container) {
+      throw new Error("No container found");
+    }
     addEventListener(
       this._container,
       "mouseup",
@@ -416,18 +435,21 @@ export class FullyLinked<NodeType, EdgeType> {
         if (this._creatingNewEdge) {
           console.log("enter dropzone and creating new edge", e);
           this._newEdgeBeingCreatedMetadata.target = node.id;
-          console.log(this._newEdgeBeingCreatedMetadata);
-          // TODO: add a new edge
-          this.addEdge({
-            id:
-              "NEW_EDGE_" +
-              this._newEdgeBeingCreatedMetadata.source +
-              "-" +
-              this._newEdgeBeingCreatedMetadata.target,
-            source: this._newEdgeBeingCreatedMetadata.source,
-            target: this._newEdgeBeingCreatedMetadata.target,
-            data: null,
-          });
+          if (
+            this._newEdgeBeingCreatedMetadata.source &&
+            this._newEdgeBeingCreatedMetadata.target
+          ) {
+            this.addEdge({
+              id:
+                "NEW_EDGE_" +
+                this._newEdgeBeingCreatedMetadata.source +
+                "-" +
+                this._newEdgeBeingCreatedMetadata.target,
+              source: this._newEdgeBeingCreatedMetadata.source,
+              target: this._newEdgeBeingCreatedMetadata.target,
+              data: {} as EdgeType,
+            });
+          }
         }
       }) as EventListener,
       this._disposer
@@ -442,10 +464,10 @@ export class FullyLinked<NodeType, EdgeType> {
   ) {
     // Inspired by @LINK https://infoheap.com/javascript-make-element-draggable/
     let dragging = false;
-    let dragStartX: number;
-    let dragStartY: number;
-    let objInitLeft: number;
-    let objInitTop: number;
+    let dragStartX: number | null;
+    let dragStartY: number | null;
+    let objInitLeft: number | null;
+    let objInitTop: number | null;
 
     const onMouseDown = (e: MouseEvent): void => {
       e.stopPropagation();
@@ -458,9 +480,14 @@ export class FullyLinked<NodeType, EdgeType> {
       dragStartX = e.pageX;
       dragStartY = e.pageY;
     };
-    nodeElement.addEventListener("mousedown", onMouseDown);
+    addEventListener(
+      nodeElement,
+      "mousedown",
+      onMouseDown as EventListener,
+      this._disposer
+    );
     const onMouseMove = (e: MouseEvent): void => {
-      if (dragging) {
+      if (dragging && objInitLeft && objInitTop && dragStartX && dragStartY) {
         e.stopPropagation();
         // xDelta and yDelta are the difference between current mouse position and the position on mousedown
         const xDelta = e.pageX - dragStartX;
@@ -472,25 +499,34 @@ export class FullyLinked<NodeType, EdgeType> {
         node.x = x;
         node.y = y;
         this.setNodeLinkAnchors(node);
-        anchorStartElements.style.left = node.startAnchorPoint.x + "px";
-        anchorStartElements.style.top = node.startAnchorPoint.y + "px";
-        anchorEndElements.style.left = node.endAnchorPoint.x + "px";
-        anchorEndElements.style.top = node.endAnchorPoint.y + "px";
+        anchorStartElements.style.left = node.startAnchorPoint?.x + "px";
+        anchorStartElements.style.top = node.startAnchorPoint?.y + "px";
+        anchorEndElements.style.left = node.endAnchorPoint?.x + "px";
+        anchorEndElements.style.top = node.endAnchorPoint?.y + "px";
 
         this._nodesMapById.set(node.id, node);
         const edges = this._edgesMapByNodeId.get(node.id);
         if (edges) {
           for (const edge of edges) {
             const d = this.getEdgePathDValue(edge);
-            const path = this._svg.querySelector(
+            const path = this._svg?.querySelector(
               `path[data-edge-id="${edge.id}"]`
             ) as SVGElement;
-            path.setAttribute("d", d);
+            if (d) {
+              path.setAttribute("d", d);
+            }
           }
         }
       }
     };
-    document.addEventListener("mousemove", onMouseMove);
+    // add "mousemove" event listener to the document because user can move the mouse outside the element
+    // after having started dragging the element without lifting the mouse button first
+    addEventListener(
+      document,
+      "mousemove",
+      onMouseMove as EventListener,
+      this._disposer
+    );
     const onMouseUp = (e: MouseEvent): void => {
       dragging = false;
       objInitLeft = null;
@@ -499,17 +535,13 @@ export class FullyLinked<NodeType, EdgeType> {
       dragStartY = null;
       e.stopPropagation();
     };
-    // add event listener to the document because user can trigger mouseup anywhere on the page
+    // add "mouseup" event listener to the document because user can trigger mouseup anywhere on the page
     // and we need to stop dragging when user does that
-    document.addEventListener("mouseup", onMouseUp);
-
-    // Add event listeners to be cleaned up on destroy
-    this._disposer.add({
-      dispose: () => {
-        nodeElement.removeEventListener("mousedown", onMouseDown);
-        document.removeEventListener("mousemove", onMouseMove);
-        document.removeEventListener("mouseup", onMouseUp);
-      },
-    });
+    addEventListener(
+      document,
+      "mouseup",
+      onMouseUp as EventListener,
+      this._disposer
+    );
   }
 }

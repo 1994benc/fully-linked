@@ -1,5 +1,6 @@
-import { FullyLinked } from "./fully-linked/FullyLinked";
-import { InternalNode } from "./fully-linked/Node";
+
+import { InternalNode } from "../fully-linked/Node";
+import { FullyLinked } from "../index";
 
 interface MyNodeDataType {
   id: string;
@@ -13,7 +14,7 @@ interface MyEdgeDataType {
 
 const fullyLinked = new FullyLinked<MyNodeDataType, MyEdgeDataType>({
   id: "test-graph",
-  container: document.getElementById("container"),
+  container: document.getElementById("container") as HTMLDivElement,
 });
 
 const getNodeElement = (node: InternalNode<MyNodeDataType>) => {

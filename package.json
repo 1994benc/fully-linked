@@ -1,16 +1,23 @@
 {
   "name": "fully-linked",
   "version": "1.0.0",
-  "source": "src/example.html",
+  "source": "src/index.ts",
   "author": "Ben Chomsang",
+  "main": "dist/main.js",
+  "module": "dist/module.js",
+  "types": "dist/types.d.ts",
   "license": "MIT",
   "private": false,
   "devDependencies": {
+    "@parcel/packager-ts": "^2.0.1",
+    "@parcel/transformer-typescript-types": "^2.0.1",
     "@types/d3": "^7.1.0",
-    "parcel": "^2.0.1"
+    "parcel": "^2.0.1",
+    "typescript": ">=3.0.0"
   },
   "scripts": {
     "start": "parcel",
+    "start:example": "parcel src/example/example.html",
     "build": "parcel build"
   },
   "dependencies": {

@@ -1,7 +1,7 @@
 import { Disposer } from "../../fully-linked/Disposer";
 
 export const addEventListener = (
-  element: HTMLElement,
+  element: HTMLElement | Document,
   eventName: keyof HTMLElementEventMap,
   eventListener: EventListener,
   disposer: Disposer

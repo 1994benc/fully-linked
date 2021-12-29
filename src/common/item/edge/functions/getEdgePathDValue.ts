@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { curveBumpX } from "d3";
-import { InternalNode } from "../node/types/Node";
-import { Edge } from "./types/Edge";
+import { InternalNode } from "../../node/types/Node";
+import { Edge } from "../types/Edge";
 
 export function getEdgePathDValue<NodeType, EdgeType>(
   nodesMapById: Map<string, InternalNode<NodeType>>,

@@ -53,6 +53,7 @@ export function createSingleNode<NodeType, EdgeType>({
   nodeElementWrapper.style.transformOrigin = "center";
   nodeElementWrapper.style.cursor = "grab";
   nodeElementWrapper.setAttribute("data-node-id", node.id);
+  nodeElementWrapper.classList.add("fully-linked-node-wrapper");
   nodeElementWrapper.appendChild(nodeElement);
   
 

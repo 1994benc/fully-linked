@@ -36,6 +36,9 @@ export function createSingleEdge<NodeType, EdgeType>({
     existingEdgeElement.remove();
   }
   const d = getEdgePathDValue(nodesMapById, edge);
+  if (!d) {
+    return;
+  }
   const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
   if (d) {
     path.setAttribute("d", d);

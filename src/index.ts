@@ -10,12 +10,16 @@ import { Node } from "./common/item/node/types/Node";
 import { setupCanvasZoomAndPan } from "./common/item/canvas/functions/setupCanvasZoomAndPan";
 import { CanvasZoomLevelMaintainer } from "./common/item/canvas/stateMaintainers/CanvasZoomLevelMaintainer";
 import { createSingleEdge } from "./common/item/edge/functions/createSingleEdge";
-import { createSingleNode } from "./common/item/node/functions/createSingleNode";
+import {
+  createSingleNode,
+  CreateSingleNodeParams,
+} from "./common/item/node/functions/createSingleNode";
 import { CreateNewEdgeStateMaintainer } from "./common/item/edge/stateMaintainers/CreateNewEdgeStateMaintainer";
 import { setNodeLinkAnchors } from "./common/item/node/functions/setNodeLinkAnchors";
 import { FullyLinkedEventEnum } from "./common/event/FullyLinkedEventEnum";
 import { addDisposableEventListener } from "./common/event/addEventListener";
 import { FullyLinkedEvent } from "./common/event/FullyLinkedEvent";
+import { UpdateDataMode } from "./common/data/UpdateDataMode";
 const edgePlaceholderId = "placeholder-edge";
 
 export class FullyLinked<NodeType, EdgeType> {
@@ -41,15 +45,17 @@ export class FullyLinked<NodeType, EdgeType> {
     this._disposer.add({
       dispose: () => {
         this._options = null;
-        this._container?.childNodes.forEach((child) => {
-          child.remove()
-        });
-        this._container = null;
+        if (this._container) this._container.innerHTML = "";
       },
     });
   }
 
   public setData(data: FullyLinkedData<NodeType, EdgeType>): void {
+    // Clear existing data
+    this._nodeMapById.clear();
+    this._edgeMapById.clear();
+    this._edgeListMapByNodeId.clear();
+
     const internalData: InternalFullyLinkedData<NodeType, EdgeType> = {
       ...data,
     };
@@ -78,6 +84,9 @@ export class FullyLinked<NodeType, EdgeType> {
     if (!this._container) {
       throw new Error("Container is not set or is undefined");
     }
+
+    // clear all existing content
+    this._container.innerHTML = "";
 
     this.destroyed = false;
 
@@ -120,7 +129,50 @@ export class FullyLinked<NodeType, EdgeType> {
     );
   }
 
-  public addEdge = (edge: Edge<EdgeType>) => {
+  public addOrReplaceNode(node: Node<NodeType>): void {
+    if (this.destroyed) {
+      throw new Error("FullyLinked is destroyed");
+    }
+    if (this._nodeMapById.has(node.id)) {
+      console.log("Node already exists - replacing it");
+    }
+    this._nodeMapById.set(node.id, node);
+
+    if (
+      !this._innerContainer ||
+      !this._internalSVGElement ||
+      !this._container
+    ) {
+      throw new Error("Cannot add a node because FullyLinked is not rendered");
+    }
+
+    if (!this._options) {
+      throw new Error("FullyLinkedOptions is not set");
+    }
+
+    const existingNodeElement = this.getNodeElement(node.id);
+    if (existingNodeElement) {
+      existingNodeElement.remove();
+    }
+
+    const createNodeParams: CreateSingleNodeParams<NodeType, EdgeType> = {
+      node,
+      innerContainer: this._innerContainer,
+      internalSVGElement: this._internalSVGElement,
+      container: this._container,
+      options: this._options,
+      nodeMapById: this._nodeMapById,
+      edgeMapById: this._edgeMapById,
+      edgeListMapByNodeId: this._edgeListMapByNodeId,
+      canvasZoomLevelMaintainer: this._zoomLevelMaintainer,
+      createNewEdgeStateMaintainer: this._createNewEdgeStateMaintainer,
+      edgePlaceholderId: edgePlaceholderId,
+      disposer: this._disposer,
+    };
+    createSingleNode(createNodeParams);
+  }
+
+  public addOrReplaceEdge = (edge: Edge<EdgeType>) => {
     createSingleEdge({
       edge,
       internalSVGElement: this._internalSVGElement as SVGSVGElement,
@@ -143,7 +195,10 @@ export class FullyLinked<NodeType, EdgeType> {
   }
 
   public getEdgeElement(id: string) {
-    return this._internalSVGElement?.querySelector(
+    if (!this._internalSVGElement) {
+      throw new Error("_internalSVGElement is not available");
+    }
+    return this._internalSVGElement.querySelector(
       `path[data-edge-id="${id}"]`
     ) as SVGElement;
   }
@@ -177,6 +232,11 @@ export class FullyLinked<NodeType, EdgeType> {
     );
   }
 
+  public destroy(): void {
+    this._disposer.dispose();
+    this.destroyed = true;
+  }
+
   // SECTION private methods:
   private createEdges() {
     for (const [, edge] of this._edgeMapById.entries()) {
@@ -191,11 +251,6 @@ export class FullyLinked<NodeType, EdgeType> {
         edgesMapByNodeId: this._edgeListMapByNodeId,
       });
     }
-  }
-
-  public destroy(): void {
-    this._disposer.dispose();
-    this.destroyed = true;
   }
 
   private createNodesAndSetNodeMapById() {
@@ -217,9 +272,9 @@ export class FullyLinked<NodeType, EdgeType> {
         internalSVGElement: this._internalSVGElement as SVGSVGElement,
         edgePlaceholderId,
         disposer: this._disposer,
-        nodesMapById: this._nodeMapById,
-        edgesMapById: this._edgeMapById,
-        edgesMapByNodeId: this._edgeListMapByNodeId,
+        nodeMapById: this._nodeMapById,
+        edgeMapById: this._edgeMapById,
+        edgeListMapByNodeId: this._edgeListMapByNodeId,
       });
     }
   }

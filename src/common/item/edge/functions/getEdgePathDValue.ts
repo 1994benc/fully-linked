@@ -10,8 +10,8 @@ export function getEdgePathDValue<NodeType, EdgeType>(
   const sourceNode = nodesMapById.get(edge.source);
   const targetNode = nodesMapById.get(edge.target);
   if (!sourceNode || !targetNode) {
-    // TODO: maybe ignore the edge, and continue working on the rest of the edges?
-    throw new Error("Source or target node not found");
+    // Return null so you can ignore this edge
+    return null
   }
   const linkGen = d3.line();
   const sourceNodeWidth = sourceNode.width;

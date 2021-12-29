@@ -19,9 +19,9 @@ export interface CreateSingleNodeParams<NodeType, EdgeType> {
   internalSVGElement: SVGSVGElement;
   edgePlaceholderId: string;
   disposer: Disposer;
-  nodesMapById: Map<string, InternalNode<NodeType>>;
-  edgesMapById: Map<string, Edge<EdgeType>>;
-  edgesMapByNodeId: Map<string, Edge<EdgeType>[]>;
+  nodeMapById: Map<string, InternalNode<NodeType>>;
+  edgeMapById: Map<string, Edge<EdgeType>>;
+  edgeListMapByNodeId: Map<string, Edge<EdgeType>[]>;
 }
 
 export function createSingleNode<NodeType, EdgeType>({
@@ -34,9 +34,9 @@ export function createSingleNode<NodeType, EdgeType>({
   internalSVGElement: svg,
   edgePlaceholderId,
   disposer,
-  nodesMapById,
-  edgesMapById,
-  edgesMapByNodeId,
+  nodeMapById: nodesMapById,
+  edgeMapById: edgesMapById,
+  edgeListMapByNodeId: edgesMapByNodeId,
 }: CreateSingleNodeParams<NodeType, EdgeType>) {
   let nodeElement: HTMLElement | ReactElement;
   let nodeElementWrapper: HTMLElement = document.createElement("div");

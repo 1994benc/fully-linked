@@ -76,6 +76,9 @@ export function setupNodeDragging<NodeType, EdgeType>({
       if (edges) {
         for (const edge of edges) {
           const d = getEdgePathDValue(nodesMapById, edge);
+          if (!d) {
+            return;
+          }
           const path = svg?.querySelector(
             `path[data-edge-id="${edge.id}"]`
           ) as SVGElement;

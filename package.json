@@ -24,7 +24,7 @@
   "scripts": {
     "start": "parcel",
     "start:example": "parcel src/example/example.html",
-    "build": "parcel build"
+    "build": "rm -rf dist && parcel build"
   },
   "dependencies": {
     "@antv/g6": "^4.5.1",

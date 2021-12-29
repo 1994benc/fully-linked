@@ -1,6 +1,6 @@
 {
   "name": "fully-linked",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "source": "src/index.ts",
   "author": "Ben Chomsang",
   "type": "module",
@@ -25,7 +25,6 @@
     "start": "parcel",
     "start:example": "parcel src/example/simple/example.html",
     "start:react-example": "parcel src/example/react/example.html",
-
     "build": "rm -rf dist && parcel build"
   },
   "dependencies": {

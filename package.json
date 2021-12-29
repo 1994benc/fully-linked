@@ -26,7 +26,7 @@
     "start:example": "parcel src/example/simple/example.html",
     "start:react-example": "parcel src/example/react/example.html",
     "build": "rm -rf dist && parcel build",
-    "publish": "rm -rf dist && yarn build && npm publish"
+    "publish-package": "rm -rf dist && yarn build && npm publish"
   },
   "dependencies": {
     "@antv/g6": "^4.5.1",

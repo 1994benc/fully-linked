@@ -83,7 +83,7 @@ const getNodeElement = (node: InternalNode<MyNodeDataType>) => {
 };
 
 // Set graph data
-fullyLinked.setData({
+fl.setData({
   nodes: [
     {
       // Each node must have a unique id
@@ -168,6 +168,6 @@ fullyLinked.setData({
 
 
 // Render the graph into the container element
-fullyLinked.render();
+fl.render();
 
 ```

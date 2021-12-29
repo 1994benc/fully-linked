@@ -12,6 +12,19 @@
 - ✅ Nodes can be any HTML elements (e.g. `<div>` or `<img>`)
 - ✅ Add nodes dynamically with drag & drop (coming soon)
 - ✅ Extend with graph layouts, including DAG, force-directed, or a custom layout (coming soon)
+- ✅ Customizable edge styles (coming soon)
+- ✅ Events (coming soon):
+  - 🎉 `nodeClick`: when a node is clicked
+  - 🎉 `nodeDrag`: when a node is dragged
+  - 🎉 `nodeDragEnd`: when a node is dropped
+  - 🎉 `edgeClick`: when an edge is clicked
+  - 🎉 `edgeDrag`: when an edge is dragged
+  - 🎉 `edgeDragEnd`: when an edge is dropped
+  - 🎉 `canvasClick`: when the canvas is clicked
+  - 🎉 `canvasDrag`: when the canvas is dragged
+  - 🎉 `canvasDragEnd`: when the canvas is dropped
+  - 🎉 `canvasZoom`: when the canvas is zoomed
+  - 🎉 `canvasZoomEnd`: when the canvas is zoomed
 
 ### 🔀 Example FullyLinked Graph
 ![Example FullyLinked Graph](src/example/example.png)

@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] - 2021-12-30
+
+### Added
+- .npmignore that ignores typescript files
+
 ## [1.0.48] - 2021-12-30
 
 ### Added

@@ -1,7 +1,7 @@
 # Changelog
 
 
-## [Unreleased]
+## [1.0.56] - 2021-12-30
 ### Fixed
 - Fix release issue
 

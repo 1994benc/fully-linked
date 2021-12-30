@@ -1,4 +1,9 @@
 # Changelog
+
+## [Unreleased]
+
+### Added
+- Update readme to include events
 ## [1.0.51] - 2021-12-30
 ### Added
 - Initial FullyLinked events

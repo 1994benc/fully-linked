@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.53] - 2021-12-30
 
 ### Fixed
 - Node drag end event should not be emitted many times

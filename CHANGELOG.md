@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.52] - 2021-12-30
 
 ### Added
 - Update readme to include events

@@ -1,4 +1,4 @@
-import { isEqual } from "lodash";
+import { areObjectsEqual } from "../other/isEqual";
 
 export function diffItems<T extends { data: any; id: string }>(
   existing: T[],
@@ -23,10 +23,12 @@ export function diffItems<T extends { data: any; id: string }>(
       removed.push(existingNode);
     }
   }
+
+
   for (const existingNode of existing) {
     const newNode = newData.find((node) => node.id === existingNode.id);
     if (newNode) {
-      if (!isEqual(existingNode.data, newNode.data)) {
+      if (!areObjectsEqual(existingNode.data, newNode.data)) {
         updated.push(newNode);
       }
     }

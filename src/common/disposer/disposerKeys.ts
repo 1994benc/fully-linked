@@ -1,0 +1,1 @@
+export const NODE_DRAGGING_DISPOSER_KEY = 'node-dragging-disposer';

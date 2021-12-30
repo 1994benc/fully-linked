@@ -2,7 +2,7 @@ import { Disposer } from "./common/disposer/Disposer";
 import {
   FullyLinkedData,
   InternalFullyLinkedData,
-} from "./common/data/FullyLinkedData";
+} from "./common/data/types/FullyLinkedData";
 import { FullyLinkedOptions } from "./common/options/FullyLinkedOptions";
 import { InternalNode } from "./common/item/node/types/Node";
 import { Edge } from "./common/item/edge/types/Edge";
@@ -19,8 +19,9 @@ import { setNodeLinkAnchors } from "./common/item/node/functions/setNodeLinkAnch
 import { FullyLinkedEventEnum } from "./common/event/FullyLinkedEventEnum";
 import { addDisposableEventListener } from "./common/event/addEventListener";
 import { FullyLinkedEvent } from "./common/event/FullyLinkedEvent";
-import { UpdateDataMode } from "./common/data/UpdateDataMode";
 import { getEdgeElement } from "./common/item/edge/functions/getEdgeElement";
+import { diffItems } from "./common/item/diffItems";
+import { getNodeElement } from "./common/item/node/functions/getNodeElement";
 const edgePlaceholderId = "placeholder-edge";
 
 export class FullyLinked<NodeType, EdgeType> {
@@ -137,8 +138,107 @@ export class FullyLinked<NodeType, EdgeType> {
     );
   }
 
-  // TODO: not working yet
-  // because anchor elements need to be removed too
+  /** Update the FullyLinked graph without recreating the entire new graph */
+  public updateData(data: FullyLinkedData<NodeType, EdgeType>): void {
+    const existingNodes = Array.from(this._nodeMapById.values());
+    const {
+      added: addedNodes,
+      removed: removedNodes,
+      updated: updatedNodes,
+    } = diffItems(existingNodes, data.nodes);
+
+    for (const node of addedNodes) {
+      this.addOrReplaceNode(node);
+    }
+    for (const node of removedNodes) {
+      this.removeNode(node);
+    }
+    for (const node of updatedNodes) {
+      this.addOrReplaceNode(node);
+    }
+
+    const existingEdges = Array.from(this._edgeMapById.values());
+    const {
+      added: addedEdges,
+      removed: removedEdges,
+      updated: updatedEdges,
+    } = diffItems(existingEdges, data.edges);
+  
+    for (const edge of addedEdges) {
+      this.addOrReplaceEdge(edge);
+    }
+
+    for (const edge of removedEdges) {
+      this.removeEdge(edge);
+    }
+
+    for (const edge of updatedEdges) {
+      this.addOrReplaceEdge(edge);
+    }
+  }
+
+  public removeNode(node: Node<NodeType>): void {
+    this.removeSingleNode(node);
+  }
+
+  public removeNodeById(nodeId: string): void {
+    const node = this._nodeMapById.get(nodeId);
+    if (node) {
+      this.removeSingleNode(node);
+    }
+  }
+
+  public removeEdge(edge: Edge<EdgeType>): void {
+    this.removeSingleEdge(edge);
+  }
+
+  public removeEdgeById(id: string): void {
+    const edge = this._edgeMapById.get(id);
+    if (edge) {
+      this.removeEdge(edge);
+    }
+  }
+
+  private removeSingleNode(node: Node<NodeType>) {
+    const nodeElement = this.getNodeElement(node.id);
+    if (nodeElement) {
+      nodeElement.remove();
+    }
+    this.getNodeEdgeAnchors(node.id).forEach((anchor) => {
+      anchor.remove();
+    });
+    this._nodeMapById.delete(node.id);
+    const relatedEdges = this._edgeListMapByNodeId.get(node.id);
+    if (relatedEdges) {
+      relatedEdges.forEach((edge) => {
+        this.removeEdge(edge);
+      });
+    }
+    this._edgeListMapByNodeId.delete(node.id);
+  }
+
+  private removeSingleEdge(edge: Edge<EdgeType>) {
+    const edgeElement = this.getEdgeElement(edge.id);
+    if (edgeElement) {
+      edgeElement.remove();
+    }
+    this._edgeMapById.delete(edge.id);
+    const edgeList = this._edgeListMapByNodeId.get(edge.source);
+    if (edgeList) {
+      const index = edgeList.findIndex((e) => e.id === edge.id);
+      if (index !== -1) {
+        edgeList.splice(index, 1);
+      }
+    }
+    const edgeList2 = this._edgeListMapByNodeId.get(edge.target);
+    if (edgeList2) {
+      const index = edgeList2.findIndex((e) => e.id === edge.id);
+      if (index !== -1) {
+        edgeList2.splice(index, 1);
+      }
+    }
+  }
+
   public addOrReplaceNode(node: Node<NodeType>): void {
     if (this.destroyed) {
       throw new Error("FullyLinked is destroyed");
@@ -182,6 +282,7 @@ export class FullyLinked<NodeType, EdgeType> {
       createNewEdgeStateMaintainer: this._createNewEdgeStateMaintainer,
       edgePlaceholderId: edgePlaceholderId,
       disposer: this._disposer,
+      getEdgeListMapByNodeId: () => this._edgeListMapByNodeId,
     };
     createSingleNode(createNodeParams);
   }
@@ -216,9 +317,10 @@ export class FullyLinked<NodeType, EdgeType> {
   }
 
   public getNodeElement(id: string) {
-    return this._container?.querySelector(
-      `[data-node-id="${id}"].fully-linked-node-wrapper`
-    ) as HTMLElement;
+    if (!this._container) {
+      throw new Error("container is not available");
+    }
+    return getNodeElement(id, this._container);
   }
 
   public getNodeEdgeAnchors(nodeId: string) {
@@ -293,6 +395,7 @@ export class FullyLinked<NodeType, EdgeType> {
         nodeMapById: this._nodeMapById,
         edgeMapById: this._edgeMapById,
         edgeListMapByNodeId: this._edgeListMapByNodeId,
+        getEdgeListMapByNodeId: () => this._edgeListMapByNodeId,
       });
     }
   }

@@ -5,6 +5,7 @@ import { CanvasZoomLevelMaintainer } from "../../canvas/stateMaintainers/CanvasZ
 import { getEdgePathDValue } from "../../edge/functions/getEdgePathDValue";
 import { Edge } from "../../edge/types/Edge";
 import { setNodeLinkAnchors } from "./setNodeLinkAnchors";
+import { NODE_DRAGGING_DISPOSER_KEY } from "../../../disposer/disposerKeys";
 
 export interface NodeDraggingSetupParams<NodeType, EdgeType> {
   nodeElement: HTMLElement;
@@ -14,7 +15,7 @@ export interface NodeDraggingSetupParams<NodeType, EdgeType> {
   disposer: Disposer;
   zoomLevelMaintainer: CanvasZoomLevelMaintainer;
   nodeMapById: Map<string, InternalNode<NodeType>>;
-  edgeListMapByNodeId: Map<string, Edge<EdgeType>[]>;
+  getEdgeListMapByNodeId: () => Map<string, Edge<EdgeType>[]>;
   internalSVGElement: SVGSVGElement;
 }
 
@@ -26,7 +27,7 @@ export function setupNodeDragging<NodeType, EdgeType>({
   disposer,
   zoomLevelMaintainer,
   nodeMapById: nodesMapById,
-  edgeListMapByNodeId: edgesMapByNodeId,
+  getEdgeListMapByNodeId,
   internalSVGElement: svg,
 }: NodeDraggingSetupParams<NodeType, EdgeType>) {
   // Inspired by @LINK https://infoheap.com/javascript-make-element-draggable/
@@ -51,7 +52,8 @@ export function setupNodeDragging<NodeType, EdgeType>({
     nodeElement,
     "mousedown",
     onMouseDown as EventListener,
-    disposer
+    disposer,
+    NODE_DRAGGING_DISPOSER_KEY
   );
   const onMouseMove = (e: MouseEvent): void => {
     if (dragging && objInitLeft && objInitTop && dragStartX && dragStartY) {
@@ -72,17 +74,15 @@ export function setupNodeDragging<NodeType, EdgeType>({
       anchorEndElement.style.top = node.endAnchorPoint?.y + "px";
 
       nodesMapById.set(node.id, node);
+      const edgesMapByNodeId = getEdgeListMapByNodeId();
       const edges = edgesMapByNodeId.get(node.id);
       if (edges) {
         for (const edge of edges) {
           const d = getEdgePathDValue(nodesMapById, edge);
-          if (!d) {
-            return;
-          }
           const path = svg?.querySelector(
             `path[data-edge-id="${edge.id}"]`
           ) as SVGElement;
-          if (d) {
+          if (d && path) {
             path.setAttribute("d", d);
           }
         }
@@ -95,7 +95,8 @@ export function setupNodeDragging<NodeType, EdgeType>({
     document,
     "mousemove",
     onMouseMove as EventListener,
-    disposer
+    disposer,
+    NODE_DRAGGING_DISPOSER_KEY
   );
   const onMouseUp = (e: MouseEvent): void => {
     dragging = false;
@@ -107,5 +108,11 @@ export function setupNodeDragging<NodeType, EdgeType>({
   };
   // add "mouseup" event listener to the document because user can trigger mouseup anywhere on the page
   // and we need to stop dragging when user does that
-  addDisposableEventListener(document, "mouseup", onMouseUp as EventListener, disposer);
+  addDisposableEventListener(
+    document,
+    "mouseup",
+    onMouseUp as EventListener,
+    disposer,
+    NODE_DRAGGING_DISPOSER_KEY
+  );
 }

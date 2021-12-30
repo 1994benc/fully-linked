@@ -23,6 +23,7 @@ export interface CreateSingleNodeParams<NodeType, EdgeType> {
   nodeMapById: Map<string, InternalNode<NodeType>>;
   edgeMapById: Map<string, Edge<EdgeType>>;
   edgeListMapByNodeId: Map<string, Edge<EdgeType>[]>;
+  getEdgeListMapByNodeId: () => Map<string, Edge<EdgeType>[]>;
 }
 
 export function createSingleNode<NodeType, EdgeType>({
@@ -38,6 +39,7 @@ export function createSingleNode<NodeType, EdgeType>({
   nodeMapById: nodesMapById,
   edgeMapById: edgesMapById,
   edgeListMapByNodeId: edgesMapByNodeId,
+  getEdgeListMapByNodeId
 }: CreateSingleNodeParams<NodeType, EdgeType>) {
   let nodeElement: HTMLElement | ReactElement;
   let nodeElementWrapper: HTMLElement = document.createElement("div");
@@ -95,7 +97,7 @@ export function createSingleNode<NodeType, EdgeType>({
       disposer,
       zoomLevelMaintainer: canvasZoomLevelMaintainer,
       nodeMapById: nodesMapById,
-      edgeListMapByNodeId: edgesMapByNodeId,
+      getEdgeListMapByNodeId,
       internalSVGElement: svg,
     });
   }

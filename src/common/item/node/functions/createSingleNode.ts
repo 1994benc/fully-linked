@@ -99,6 +99,7 @@ export function createSingleNode<NodeType, EdgeType>({
       nodeMapById: nodesMapById,
       getEdgeListMapByNodeId,
       internalSVGElement: svg,
+      container
     });
   }
 

@@ -7,6 +7,9 @@ import { addDisposableEventListener } from "../../../event/addEventListener";
 import { CanvasZoomLevelMaintainer } from "../../canvas/stateMaintainers/CanvasZoomLevelMaintainer";
 import { Edge } from "../../edge/types/Edge";
 import { setUpEdgeCreationDropZone } from "../../edge/functions/setupEdgeCreationDropZone";
+import { FullyLinkedEvent } from "../../../event/FullyLinkedEvent";
+import { dispatchFullyLinkedEvent } from "../../../event/dispatchFullyLinkedEvent";
+import { FullyLinkedEventEnum } from "../../../event/FullyLinkedEventEnum";
 
 interface CreateEdgeOnAnchorDraggingParams<NodeType, EdgeType> {
   anchorEndElem: HTMLDivElement;
@@ -46,16 +49,19 @@ export function setUpCreateEdgeOnAnchorDragging<NodeType, EdgeType>({
   let objInitTop: number;
 
   const anchorEndMouseDownListener = (e: PointerEvent) => {
-    e.stopPropagation();
-    console.log(
-      "Mousedown",
-      dragStartX,
-      dragStartY,
-      objInitLeft,
-      objInitTop,
-      node.id,
-      anchorEndElem
+    // First, dispatch edgeCreationStart event
+    const beforeEdgeCreationParams: FullyLinkedEvent<NodeType, EdgeType, {}> = {
+      item: null,
+      itemType: "edge",
+      info: {},
+    };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.manualEdgeCreationStart,
+      beforeEdgeCreationParams,
+      container
     );
+
+    e.stopPropagation();
     // remove any old placeholder paths if exist
     const oldPath = svg?.querySelector(
       `path[data-edge-id="${edgePlaceholderId}"]`
@@ -71,7 +77,10 @@ export function setUpCreateEdgeOnAnchorDragging<NodeType, EdgeType>({
     const d = linkGen(singleLinkData);
 
     if (d) {
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      const path = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path"
+      );
       path.setAttribute("d", d);
       path.setAttribute("stroke", "black");
       path.setAttribute("stroke-width", "1");
@@ -168,6 +177,7 @@ export function setUpCreateEdgeOnAnchorDragging<NodeType, EdgeType>({
     svg as SVGSVGElement,
     nodesMapById,
     edgesMapById,
-    edgesMapByNodeId
+    edgesMapByNodeId,
+    container
   );
 }

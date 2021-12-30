@@ -6,6 +6,9 @@ import { getEdgePathDValue } from "../../edge/functions/getEdgePathDValue";
 import { Edge } from "../../edge/types/Edge";
 import { setNodeLinkAnchors } from "./setNodeLinkAnchors";
 import { NODE_DRAGGING_DISPOSER_KEY } from "../../../disposer/disposerKeys";
+import { FullyLinkedEvent } from "../../../event/FullyLinkedEvent";
+import { dispatchFullyLinkedEvent } from "../../../event/dispatchFullyLinkedEvent";
+import { FullyLinkedEventEnum } from "../../../event/FullyLinkedEventEnum";
 
 export interface NodeDraggingSetupParams<NodeType, EdgeType> {
   nodeElement: HTMLElement;
@@ -17,6 +20,7 @@ export interface NodeDraggingSetupParams<NodeType, EdgeType> {
   nodeMapById: Map<string, InternalNode<NodeType>>;
   getEdgeListMapByNodeId: () => Map<string, Edge<EdgeType>[]>;
   internalSVGElement: SVGSVGElement;
+  container: HTMLElement;
 }
 
 export function setupNodeDragging<NodeType, EdgeType>({
@@ -29,6 +33,7 @@ export function setupNodeDragging<NodeType, EdgeType>({
   nodeMapById: nodesMapById,
   getEdgeListMapByNodeId,
   internalSVGElement: svg,
+  container,
 }: NodeDraggingSetupParams<NodeType, EdgeType>) {
   // Inspired by @LINK https://infoheap.com/javascript-make-element-draggable/
   let dragging = false;
@@ -38,6 +43,22 @@ export function setupNodeDragging<NodeType, EdgeType>({
   let objInitTop: number | null;
 
   const onMouseDown = (e: MouseEvent): void => {
+    // First, dispatch an event that the node is being dragged
+    const nodeDraggingStartedParams: FullyLinkedEvent<
+      NodeType,
+      EdgeType,
+      MouseEvent
+    > = {
+      item: node,
+      itemType: "node",
+      info: e,
+    };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.nodeDragStart,
+      nodeDraggingStartedParams,
+      container
+    );
+
     e.stopPropagation();
     dragging = true;
     // Store element page position on mousedown using element.offsetLeft and element.offsetTop
@@ -87,6 +108,21 @@ export function setupNodeDragging<NodeType, EdgeType>({
           }
         }
       }
+      // Dispatch an event that the node is being dragged
+      const nodeDraggingParams: FullyLinkedEvent<
+        NodeType,
+        EdgeType,
+        MouseEvent
+      > = {
+        item: node,
+        itemType: "node",
+        info: e,
+      };
+      dispatchFullyLinkedEvent(
+        FullyLinkedEventEnum.nodeDrag,
+        nodeDraggingParams,
+        container
+      );
     }
   };
   // add "mousemove" event listener to the document because user can move the mouse outside the element
@@ -105,6 +141,21 @@ export function setupNodeDragging<NodeType, EdgeType>({
     dragStartX = null;
     dragStartY = null;
     e.stopPropagation();
+    // Dispatch an event that the node drag has ended
+    const nodeDraggingEndedParams: FullyLinkedEvent<
+      NodeType,
+      EdgeType,
+      MouseEvent
+    > = {
+      item: node,
+      itemType: "node",
+      info: e,
+    };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.nodeDragEnd,
+      nodeDraggingEndedParams,
+      container
+    );
   };
   // add "mouseup" event listener to the document because user can trigger mouseup anywhere on the page
   // and we need to stop dragging when user does that

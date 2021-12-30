@@ -2,7 +2,7 @@ import { Disposer } from "../disposer/Disposer";
 import { FullyLinkedEventEnum } from "./FullyLinkedEventEnum";
 
 export const addDisposableEventListener = (
-  element: HTMLElement | Document,
+  element: Element | Document,
   eventName: keyof HTMLElementEventMap | FullyLinkedEventEnum,
   eventListener: EventListener,
   disposer: Disposer,

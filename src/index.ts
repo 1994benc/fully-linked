@@ -22,6 +22,10 @@ import { FullyLinkedEvent } from "./common/event/FullyLinkedEvent";
 import { getEdgeElement } from "./common/item/edge/functions/getEdgeElement";
 import { diffItems } from "./common/item/diffItems";
 import { getNodeElement } from "./common/item/node/functions/getNodeElement";
+import { dispatchFullyLinkedEvent } from "./common/event/dispatchFullyLinkedEvent";
+import Logger from 'pino'
+const logger = Logger();
+
 const edgePlaceholderId = "placeholder-edge";
 
 export class FullyLinked<NodeType, EdgeType> {
@@ -53,6 +57,17 @@ export class FullyLinked<NodeType, EdgeType> {
   }
 
   public setData(data: FullyLinkedData<NodeType, EdgeType>): void {
+
+    
+    if (!this._container) {
+      throw new Error("Container is not set or is undefined");
+    }
+
+    // First, dispatch the event that the data is about to be set
+    const beforeDatasetEventParams: FullyLinkedEvent<null, null, FullyLinkedData<NodeType, EdgeType>> = { item: null, itemType: null, info: data };
+    dispatchFullyLinkedEvent(FullyLinkedEventEnum.beforeSetData, beforeDatasetEventParams, this._container);
+
+
     // Clear existing data
     this._nodeMapById.clear();
     this._edgeMapById.clear();
@@ -86,6 +101,11 @@ export class FullyLinked<NodeType, EdgeType> {
         this._edgeListMapByNodeId.get(edge.target)?.push(edge);
       }
     }
+
+    // Dispatch the event that the data has been set
+    const afterSetDataEventParams: FullyLinkedEvent<null, null, FullyLinkedData<NodeType, EdgeType>> = { item: null, itemType: null, info: data };
+    dispatchFullyLinkedEvent(FullyLinkedEventEnum.afterSetData, afterSetDataEventParams, this._container);
+
   }
 
   /** Initialises and renders a FullyLinked graph */
@@ -93,6 +113,10 @@ export class FullyLinked<NodeType, EdgeType> {
     if (!this._container) {
       throw new Error("Container is not set or is undefined");
     }
+
+    // First, dispatch the event that the graph is about to be rendered
+    const beforeRenderEventParams: FullyLinkedEvent<null, null, null> = { item: null, itemType: null, info: null };
+    dispatchFullyLinkedEvent(FullyLinkedEventEnum.beforeRender, beforeRenderEventParams, this._container);
 
     // clear all existing content
     this._container.innerHTML = "";
@@ -136,10 +160,21 @@ export class FullyLinked<NodeType, EdgeType> {
       this._innerContainer,
       this._container
     );
+    // Dispatch the event that the graph has been rendered
+    const afterRenderEventParams: FullyLinkedEvent<null, null, null> = { item: null, itemType: null, info: null };
+    dispatchFullyLinkedEvent(FullyLinkedEventEnum.afterRender, afterRenderEventParams, this._container);
   }
 
   /** Update the FullyLinked graph without recreating the entire new graph */
   public updateData(data: FullyLinkedData<NodeType, EdgeType>): void {
+    if (!this._container) {
+      throw new Error("Container is not set or is undefined");
+    }
+
+    // First, dispatch the event that the data is about to be updated
+    const beforeUpdateDataEventParams: FullyLinkedEvent<null, null, FullyLinkedData<NodeType, EdgeType>> = { item: null, itemType: null, info: data };
+    dispatchFullyLinkedEvent(FullyLinkedEventEnum.beforeUpdateData, beforeUpdateDataEventParams, this._container);
+
     const existingNodes = Array.from(this._nodeMapById.values());
     const {
       added: addedNodes,
@@ -175,10 +210,26 @@ export class FullyLinked<NodeType, EdgeType> {
     for (const edge of updatedEdges) {
       this.addOrReplaceEdge(edge);
     }
+
+    // Dispatch the event that the data has been updated
+    const afterUpdateDataEventParams: FullyLinkedEvent<null, null, FullyLinkedData<NodeType, EdgeType>> = { item: null, itemType: null, info: data };
+    dispatchFullyLinkedEvent(FullyLinkedEventEnum.afterUpdateData, afterUpdateDataEventParams, this._container);
   }
 
   public removeNode(node: Node<NodeType>): void {
+    if (!this._container) {
+      throw new Error("Container is not set or is undefined");
+    }
+    // First, dispatch the event that the node is about to be removed
+    const beforeRemoveNodeEventParams: FullyLinkedEvent<NodeType, EdgeType, null> = { item: node, itemType: "node", info: null };
+    dispatchFullyLinkedEvent(FullyLinkedEventEnum.beforeRemoveNode, beforeRemoveNodeEventParams, this._container);
+
+    // Remove node
     this.removeSingleNode(node);
+
+    // Dispatch the event that the node has been removed
+    const afterRemoveNodeEventParams: FullyLinkedEvent<NodeType, EdgeType, null> = { item: node, itemType: "node", info: null };
+    dispatchFullyLinkedEvent(FullyLinkedEventEnum.afterRemoveNode, afterRemoveNodeEventParams, this._container);
   }
 
   public removeNodeById(nodeId: string): void {
@@ -189,7 +240,18 @@ export class FullyLinked<NodeType, EdgeType> {
   }
 
   public removeEdge(edge: Edge<EdgeType>): void {
+    if (!this._container) {
+      throw new Error("Container is not set or is undefined");
+    }
+    // First, dispatch the event that the edge is about to be removed
+    const beforeRemoveEdgeEventParams: FullyLinkedEvent<NodeType, EdgeType, null> = { item: edge, itemType: "edge", info: null };
+    dispatchFullyLinkedEvent(FullyLinkedEventEnum.beforeRemoveEdge, beforeRemoveEdgeEventParams, this._container);
+    
     this.removeSingleEdge(edge);
+
+    // Dispatch the event that the edge has been removed
+    const afterRemoveEdgeEventParams: FullyLinkedEvent<NodeType, EdgeType, null> = { item: edge, itemType: "edge", info: null };
+    dispatchFullyLinkedEvent(FullyLinkedEventEnum.afterRemoveEdge, afterRemoveEdgeEventParams, this._container);
   }
 
   public removeEdgeById(id: string): void {
@@ -244,7 +306,7 @@ export class FullyLinked<NodeType, EdgeType> {
       throw new Error("FullyLinked is destroyed");
     }
     if (this._nodeMapById.has(node.id)) {
-      console.log("Node already exists - replacing it");
+      logger.warn(`Node with id ${node.id} already exists. Replacing it.`);
     }
     this._nodeMapById.set(node.id, node);
 
@@ -288,12 +350,18 @@ export class FullyLinked<NodeType, EdgeType> {
   }
 
   public addOrReplaceEdge = (edge: Edge<EdgeType>) => {
+    if (!this._container) {
+      throw new Error("Container is not set or is undefined");
+    }
+
     createSingleEdge({
       edge,
       internalSVGElement: this._internalSVGElement as SVGSVGElement,
       nodesMapById: this._nodeMapById,
       edgesMapById: this._edgeMapById,
       edgesMapByNodeId: this._edgeListMapByNodeId,
+      disposer: this._disposer,
+      containerElement: this._container,
     });
   };
 
@@ -344,7 +412,7 @@ export class FullyLinked<NodeType, EdgeType> {
       ((e: CustomEvent) => {
         callback({
           item: e.detail.item as Node<NodeType> | Edge<EdgeType>,
-          itemType: e.detail.type as "node" | "edge",
+          itemType: e.detail.itemType as "node" | "edge",
           info: e.detail.info as SpecificFullyLinkedEventInfo,
         });
       }) as EventListener,
@@ -363,12 +431,17 @@ export class FullyLinked<NodeType, EdgeType> {
       if (!this._internalSVGElement) {
         throw new Error("SVG is not set");
       }
+      if (!this._container) {
+        throw new Error("Container is not set");
+      }
       createSingleEdge({
         edge,
         internalSVGElement: this._internalSVGElement,
         nodesMapById: this._nodeMapById,
         edgesMapById: this._edgeMapById,
         edgesMapByNodeId: this._edgeListMapByNodeId,
+        disposer: this._disposer,
+        containerElement: this._container,
       });
     }
   }

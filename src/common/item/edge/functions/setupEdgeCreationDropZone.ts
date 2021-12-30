@@ -4,6 +4,9 @@ import { CreateNewEdgeStateMaintainer } from "./../stateMaintainers/CreateNewEdg
 import { addDisposableEventListener } from "../../../event/addEventListener";
 import { createSingleEdge } from "./createSingleEdge";
 import { Edge } from "./../types/Edge";
+import { FullyLinkedEvent } from "../../../event/FullyLinkedEvent";
+import { FullyLinkedEventEnum } from "../../../event/FullyLinkedEventEnum";
+import { dispatchFullyLinkedEvent } from "../../../event/dispatchFullyLinkedEvent";
 
 export function setUpEdgeCreationDropZone<NodeType, EdgeType>(
   anchorStartElem: HTMLDivElement,
@@ -13,14 +16,14 @@ export function setUpEdgeCreationDropZone<NodeType, EdgeType>(
   internalSVGElement: SVGSVGElement,
   nodesMapById: Map<string, InternalNode<NodeType>>,
   edgesMapById: Map<string, Edge<EdgeType>>,
-  edgesMapByNodeId: Map<string, Edge<EdgeType>[]>
+  edgesMapByNodeId: Map<string, Edge<EdgeType>[]>,
+  containerElement: HTMLElement
 ): void {
   addDisposableEventListener(
     anchorStartElem,
     "mouseup",
     ((e: PointerEvent) => {
       if (creatingNewEdgeStateMaintainer.creatingNewEdge) {
-        console.log("enter dropzone and creating new edge", e);
         creatingNewEdgeStateMaintainer.newEdgeMetadata.target = node.id;
         if (
           creatingNewEdgeStateMaintainer.newEdgeMetadata.source &&
@@ -36,8 +39,32 @@ export function setUpEdgeCreationDropZone<NodeType, EdgeType>(
             target: creatingNewEdgeStateMaintainer.newEdgeMetadata.target,
             data: {} as EdgeType,
           };
-          createSingleEdge(
-            { edge, internalSVGElement: internalSVGElement, nodesMapById, edgesMapById, edgesMapByNodeId }          );
+
+          createSingleEdge({
+            edge,
+            internalSVGElement: internalSVGElement,
+            nodesMapById,
+            edgesMapById,
+            edgesMapByNodeId,
+            disposer,
+            containerElement,
+          });
+
+          // Dispatch an event that the edge has been fully created
+          const edgeCreationEndSuccessfullyParams: FullyLinkedEvent<
+            NodeType,
+            EdgeType,
+            Edge<EdgeType>
+          > = {
+            item: edge,
+            itemType: "edge",
+            info: edge,
+          };
+          dispatchFullyLinkedEvent(
+            FullyLinkedEventEnum.manualEdgeCreationEndSuccessfully,
+            edgeCreationEndSuccessfullyParams,
+            containerElement
+          );
         }
       }
     }) as EventListener,

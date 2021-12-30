@@ -1,3 +1,8 @@
+import { Disposer } from "../../../disposer/Disposer";
+import { addDisposableEventListener } from "../../../event/addEventListener";
+import { dispatchFullyLinkedEvent } from "../../../event/dispatchFullyLinkedEvent";
+import { FullyLinkedEvent } from "../../../event/FullyLinkedEvent";
+import { FullyLinkedEventEnum } from "../../../event/FullyLinkedEventEnum";
 import { InternalNode } from "../../node/types/Node";
 import { Edge } from "../types/Edge";
 import { getEdgeElement } from "./getEdgeElement";
@@ -9,6 +14,8 @@ interface SingleEdgeCreationParams<EdgeType, NodeType> {
   nodesMapById: Map<string, InternalNode<NodeType>>;
   edgesMapById: Map<string, Edge<EdgeType>>;
   edgesMapByNodeId: Map<string, Edge<EdgeType>[]>;
+  disposer: Disposer;
+  containerElement: HTMLElement;
 }
 
 export function createSingleEdge<NodeType, EdgeType>({
@@ -17,6 +24,8 @@ export function createSingleEdge<NodeType, EdgeType>({
   nodesMapById,
   edgesMapById,
   edgesMapByNodeId,
+  disposer,
+  containerElement,
 }: SingleEdgeCreationParams<EdgeType, NodeType>): void {
   const sourceNode = nodesMapById.get(edge.source);
   const targetNode = nodesMapById.get(edge.target);
@@ -51,10 +60,77 @@ export function createSingleEdge<NodeType, EdgeType>({
       path.setAttribute("stroke-width", "1");
       path.setAttribute("fill", "none");
       path.setAttribute("data-edge-id", edge.id);
+      addDisposableEventListener(
+        path,
+        "click",
+        (event) => {
+          const eventParams: FullyLinkedEvent<NodeType, EdgeType, Event> = {
+            info: event,
+            item: edge,
+            itemType: "edge",
+          };
+          dispatchFullyLinkedEvent(
+            FullyLinkedEventEnum.edgeClick,
+            eventParams,
+            containerElement
+          );
+        },
+        disposer
+      );
+
+      addDisposableEventListener(
+        path,
+        "dblclick",
+        (event) => {
+          const eventParams: FullyLinkedEvent<NodeType, EdgeType, Event> = {
+            info: event,
+            item: edge,
+            itemType: "edge",
+          };
+          dispatchFullyLinkedEvent(
+            FullyLinkedEventEnum.edgeDblClick,
+            eventParams,
+            containerElement
+          );
+        },
+        disposer
+      );
+
+      addDisposableEventListener(
+        path,
+        "contextmenu",
+        ((event: PointerEvent) => {
+          event.preventDefault();
+          const eventParams: FullyLinkedEvent<NodeType, EdgeType, Event> = {
+            info: event,
+            item: edge,
+            itemType: "edge",
+          };
+          dispatchFullyLinkedEvent(
+            FullyLinkedEventEnum.edgeRightClick,
+            eventParams,
+            containerElement
+          );
+        }) as EventListener,
+        disposer
+      );
+
       if (!svg) {
         throw new Error("svg is required");
       }
       svg?.appendChild(path);
+
+      // Dispatch event that the edge has been created
+      const eventParams: FullyLinkedEvent<NodeType, EdgeType, {}> = {
+        info: {},
+        item: edge,
+        itemType: "edge",
+      };
+      dispatchFullyLinkedEvent(
+        FullyLinkedEventEnum.edgeCreated,
+        eventParams,
+        containerElement
+      );
     }
   }
 }

@@ -1,5 +1,5 @@
 # Changelog
-## [Unreleased]
+## [1.0.51] - 2021-12-30
 ### Added
 - Initial FullyLinked events
 - Add pino logger library

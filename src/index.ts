@@ -22,6 +22,10 @@ import { FullyLinkedEvent } from "./common/event/FullyLinkedEvent";
 import { getEdgeElement } from "./common/item/edge/functions/getEdgeElement";
 import { diffItems } from "./common/item/diffItems";
 import { getNodeElement } from "./common/item/node/functions/getNodeElement";
+import { dispatchFullyLinkedEvent } from "./common/event/dispatchFullyLinkedEvent";
+import Logger from 'pino'
+const logger = Logger();
+
 const edgePlaceholderId = "placeholder-edge";
 
 export class FullyLinked<NodeType, EdgeType> {
@@ -244,7 +248,7 @@ export class FullyLinked<NodeType, EdgeType> {
       throw new Error("FullyLinked is destroyed");
     }
     if (this._nodeMapById.has(node.id)) {
-      console.log("Node already exists - replacing it");
+      logger.warn(`Node with id ${node.id} already exists. Replacing it.`);
     }
     this._nodeMapById.set(node.id, node);
 

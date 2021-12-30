@@ -1,4 +1,4 @@
-import { areObjectsEqual } from "../other/isEqual";
+import { areObjectsEqual } from "../other/areObjectsEqual";
 
 export function diffItems<T extends { data: any; id: string }>(
   existing: T[],
@@ -8,15 +8,6 @@ export function diffItems<T extends { data: any; id: string }>(
   removed: T[];
   updated: T[];
 } {
-  console.log(areObjectsEqual(2,3), false)
-  console.log(areObjectsEqual({a:3},{a:3}), true)
-  console.log(areObjectsEqual({a:4},{a:3}), false)
-  console.log(areObjectsEqual({a:[3,3]},{a:[3,3]}), true)
-  console.log(areObjectsEqual({a:[3,4]},{a:[3,3]}), false)
-  console.log(areObjectsEqual({a:[3,{'name':"ben"}]},{a:[3,{'name':"ben"}]}), true)
-  console.log(areObjectsEqual({a:[3,{'name':"ben"}]},{a:[3,{'name':"besn"}]}), false)
-
-
   const added: T[] = [];
   const removed: T[] = [];
   const updated: T[] = [];

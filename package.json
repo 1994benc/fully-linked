@@ -1,6 +1,6 @@
 {
   "name": "fully-linked",
-  "version": "1.0.42",
+  "version": "1.0.41",
   "source": "src/index.ts",
   "author": "Ben Chomsang",
   "type": "module",
@@ -9,7 +9,7 @@
     "type": "git",
     "url": "https://github.com/1994benc/fullylinked.git"
   },
-  "main": "dist/main.js",
+  "module": "dist/module.js",
   "types": "dist/types.d.ts",
   "license": "MIT",
   "private": false,

@@ -135,27 +135,30 @@ export function setupNodeDragging<NodeType, EdgeType>({
     NODE_DRAGGING_DISPOSER_KEY
   );
   const onMouseUp = (e: MouseEvent): void => {
-    dragging = false;
-    objInitLeft = null;
-    objInitTop = null;
-    dragStartX = null;
-    dragStartY = null;
-    e.stopPropagation();
-    // Dispatch an event that the node drag has ended
-    const nodeDraggingEndedParams: FullyLinkedEvent<
-      NodeType,
-      EdgeType,
-      MouseEvent
-    > = {
-      item: node,
-      itemType: "node",
-      info: e,
-    };
-    dispatchFullyLinkedEvent(
-      FullyLinkedEventEnum.nodeDragEnd,
-      nodeDraggingEndedParams,
-      container
-    );
+    if (dragging) {
+      dragging = false;
+      objInitLeft = null;
+      objInitTop = null;
+      dragStartX = null;
+      dragStartY = null;
+      e.stopPropagation();
+      // Dispatch an event that the node drag has ended
+      // TODO: only dispatch for currently being dragged, not all of them
+      const nodeDraggingEndedParams: FullyLinkedEvent<
+        NodeType,
+        EdgeType,
+        MouseEvent
+      > = {
+        item: node,
+        itemType: "node",
+        info: e,
+      };
+      dispatchFullyLinkedEvent(
+        FullyLinkedEventEnum.nodeDragEnd,
+        nodeDraggingEndedParams,
+        container
+      );
+    }
   };
   // add "mouseup" event listener to the document because user can trigger mouseup anywhere on the page
   // and we need to stop dragging when user does that

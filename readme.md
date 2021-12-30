@@ -25,7 +25,7 @@
   - 🎉 `canvasZoomEnd`: when the canvas is zoomed
 
 ### 🔀 Example FullyLinked Graph
-![Example FullyLinked Graph](src/example/example.png)
+![Example FullyLinked Graph](src/example/simple/example.png)
 
 ### ℹ️ Get started
 

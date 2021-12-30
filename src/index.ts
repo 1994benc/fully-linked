@@ -20,6 +20,7 @@ import { FullyLinkedEventEnum } from "./common/event/FullyLinkedEventEnum";
 import { addDisposableEventListener } from "./common/event/addEventListener";
 import { FullyLinkedEvent } from "./common/event/FullyLinkedEvent";
 import { UpdateDataMode } from "./common/data/UpdateDataMode";
+import { getEdgeElement } from "./common/item/edge/functions/getEdgeElement";
 const edgePlaceholderId = "placeholder-edge";
 
 export class FullyLinked<NodeType, EdgeType> {
@@ -211,9 +212,7 @@ export class FullyLinked<NodeType, EdgeType> {
     if (!this._internalSVGElement) {
       throw new Error("_internalSVGElement is not available");
     }
-    return this._internalSVGElement.querySelector(
-      `path[data-edge-id="${id}"]`
-    ) as SVGElement;
+    return getEdgeElement(id, this._internalSVGElement);
   }
 
   public getNodeElement(id: string) {

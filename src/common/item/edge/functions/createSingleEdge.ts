@@ -25,7 +25,6 @@ export function createSingleEdge<NodeType, EdgeType>({
     return;
   }
   edgesMapById.set(edge.id, edge);
-  edgesMapByNodeId.get(edge.source);
   if (!edgesMapByNodeId.has(edge.source)) {
     edgesMapByNodeId.set(edge.source, [edge]);
   } else {
@@ -37,21 +36,25 @@ export function createSingleEdge<NodeType, EdgeType>({
     edgesMapByNodeId.get(edge.target)?.push(edge);
   }
 
-  const existingEdgeElement = getEdgeElement(edge.id, svg);
-  if (existingEdgeElement) {
-    existingEdgeElement.remove();
-  }
   const d = getEdgePathDValue(nodesMapById, edge);
   if (d) {
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", d);
-    path.setAttribute("stroke", "black");
-    path.setAttribute("stroke-width", "1");
-    path.setAttribute("fill", "none");
-    path.setAttribute("data-edge-id", edge.id);
-    if (!svg) {
-      throw new Error("svg is required");
+    const existingEdgeElement = getEdgeElement(edge.id, svg);
+    if (existingEdgeElement) {
+      existingEdgeElement.setAttribute("d", d);
+    } else {
+      const path = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "path"
+      );
+      path.setAttribute("d", d);
+      path.setAttribute("stroke", "black");
+      path.setAttribute("stroke-width", "1");
+      path.setAttribute("fill", "none");
+      path.setAttribute("data-edge-id", edge.id);
+      if (!svg) {
+        throw new Error("svg is required");
+      }
+      svg?.appendChild(path);
     }
-    svg?.appendChild(path);
   }
 }

@@ -5,12 +5,21 @@ export const addDisposableEventListener = (
   element: HTMLElement | Document,
   eventName: keyof HTMLElementEventMap | FullyLinkedEventEnum,
   eventListener: EventListener,
-  disposer: Disposer
+  disposer: Disposer,
+  specificDisposerKeyToUse?: string
 ) => {
   element.addEventListener(eventName, eventListener);
-  disposer.add({
-    dispose: () => {
-      element.removeEventListener(eventName, eventListener);
-    },
-  });
+  if (specificDisposerKeyToUse){
+    disposer.addSpecific(specificDisposerKeyToUse, {
+      dispose: () => {
+        element.removeEventListener(eventName, eventListener);
+      },
+    });
+  } else {
+    disposer.add({
+      dispose: () => {
+        element.removeEventListener(eventName, eventListener);
+      },
+    });
+  }
 };

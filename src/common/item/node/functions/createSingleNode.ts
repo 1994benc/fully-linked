@@ -8,6 +8,7 @@ import { InternalNode } from "../types/Node";
 import { setupNodeDragging } from "./setupNodeDragging";
 import { ReactElement } from "react";
 import * as ReactDOM from "react-dom";
+import { setNodeLinkAnchors } from "./setNodeLinkAnchors";
 
 export interface CreateSingleNodeParams<NodeType, EdgeType> {
   node: InternalNode<NodeType>;
@@ -64,6 +65,8 @@ export function createSingleNode<NodeType, EdgeType>({
     nodeElement.innerText = node.id;
     nodeElementWrapper.appendChild(nodeElement);
   }
+
+  setNodeLinkAnchors(node);
   
 
   // Create anchor point elements

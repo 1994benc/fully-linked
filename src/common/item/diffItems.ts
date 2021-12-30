@@ -1,4 +1,4 @@
-import { areObjectsEqual } from "../other/areObjectsEqual";
+import { areObjectsEqual } from "../other/isEqual";
 
 export function diffItems<T extends { data: any; id: string }>(
   existing: T[],

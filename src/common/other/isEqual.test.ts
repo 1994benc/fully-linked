@@ -1,6 +1,6 @@
-import { areObjectsEqual } from "./areObjectsEqual";
+import { areObjectsEqual } from "./isEqual";
 
-describe("diffItems", () => {
+describe("isEqual", () => {
   test("1 !== 2", () => {
     expect(areObjectsEqual(1, 2)).toBe(false);
   });

@@ -10,7 +10,6 @@
     "url": "https://github.com/1994benc/fullylinked.git"
   },
   "main": "dist/main.js",
-  "module": "dist/module.js",
   "types": "dist/types.d.ts",
   "license": "MIT",
   "private": false,

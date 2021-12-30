@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.48] - 2021-12-30
 
 ### Added
 

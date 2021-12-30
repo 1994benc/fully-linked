@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased] - 2021-12-30
+## [1.0.49] - 2021-12-30 - 2021-12-30
 
 ### Added
 - test .npmignore file

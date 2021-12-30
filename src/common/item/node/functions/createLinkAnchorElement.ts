@@ -5,6 +5,7 @@ import { Edge } from "../../edge/types/Edge";
 import { InternalNode } from "../types/Node";
 import { setUpCreateEdgeOnAnchorDragging } from "./setUpCreateEdgeOnAnchorDragging";
 
+// TODO: make link anchors part of node element instead of separate elements
 export function createLinkAnchorElement<NodeType, EdgeType>(
   node: InternalNode<NodeType>,
   internalSVGElement: SVGSVGElement,
@@ -23,7 +24,7 @@ export function createLinkAnchorElement<NodeType, EdgeType>(
   anchorStartElem.style.position = "absolute";
   anchorStartElem.style.left = node.startAnchorPoint?.x + "px";
   anchorStartElem.style.top = node.startAnchorPoint?.y + "px";
-  anchorStartElem.classList.add("anchor-point-element");
+  anchorStartElem.classList.add("fully-linked-node-anchor");
   anchorStartElem.classList.add("anchor-start-element");
   anchorStartElem.style.transform = "translate(-50%, -50%)";
   anchorStartElem.style.background = "black";
@@ -34,7 +35,7 @@ export function createLinkAnchorElement<NodeType, EdgeType>(
   anchorEndElem.style.position = "absolute";
   anchorEndElem.style.left = node.endAnchorPoint?.x + "px";
   anchorEndElem.style.top = node.endAnchorPoint?.y + "px";
-  anchorEndElem.classList.add("anchor-point-element");
+  anchorEndElem.classList.add("fully-linked-node-anchor");
   anchorEndElem.classList.add("anchor-end-element");
 
   anchorEndElem.style.transform = "translate(-50%, -50%)";

@@ -65,7 +65,10 @@ export class FullyLinked<NodeType, EdgeType> {
     }
 
     for (const edge of internalData.edges) {
-      if (!this._nodeMapById.get(edge.source) || !this._nodeMapById.get(edge.target)) {
+      if (
+        !this._nodeMapById.get(edge.source) ||
+        !this._nodeMapById.get(edge.target)
+      ) {
         // Target or source node does not exist. Skip this edge and continue without throwing an error.
         continue;
       }
@@ -133,6 +136,8 @@ export class FullyLinked<NodeType, EdgeType> {
     );
   }
 
+  // TODO: not working yet
+  // because anchor elements need to be removed too
   public addOrReplaceNode(node: Node<NodeType>): void {
     if (this.destroyed) {
       throw new Error("FullyLinked is destroyed");
@@ -157,6 +162,10 @@ export class FullyLinked<NodeType, EdgeType> {
     const existingNodeElement = this.getNodeElement(node.id);
     if (existingNodeElement) {
       existingNodeElement.remove();
+    }
+    const existingAnchorElements = this.getNodeEdgeAnchors(node.id);
+    for (const anchorElement of existingAnchorElements) {
+      anchorElement.remove();
     }
 
     const createNodeParams: CreateSingleNodeParams<NodeType, EdgeType> = {
@@ -209,8 +218,14 @@ export class FullyLinked<NodeType, EdgeType> {
 
   public getNodeElement(id: string) {
     return this._container?.querySelector(
-      `[data-node-id="${id}"]`
-    ) as SVGElement;
+      `[data-node-id="${id}"].fully-linked-node-wrapper`
+    ) as HTMLElement;
+  }
+
+  public getNodeEdgeAnchors(nodeId: string) {
+    return this._container?.querySelectorAll(
+      `[data-node-id="${nodeId}"].fully-linked-node-anchor`
+    ) as NodeListOf<HTMLElement>;
   }
 
   public on<SpecificFullyLinkedEventInfo>(

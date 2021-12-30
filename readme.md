@@ -10,10 +10,8 @@
 - ✅ Add edges dynamically with drag & drop
 - ✅ Zoomable & draggable canvas
 - ✅ Nodes can be any HTML elements (e.g. `<div>` or `<img>`) or even a React component
-- ✅ Add nodes dynamically with drag & drop (coming soon)
-- ✅ Extend with graph layouts, including DAG, force-directed, or a custom layout (coming soon)
-- ✅ Customizable edge styles (coming soon)
-- ✅ Events (coming soon):
+- ✅ Add nodes dynamically with drag & drop
+- ✅ Events:
   - 🎉 `nodeClick`: when a node is clicked
   - 🎉 `nodeDrag`: when a node is dragged
   - 🎉 `nodeDragEnd`: when a node is dropped
@@ -23,6 +21,10 @@
   - 🎉 `canvasDragEnd`: when the canvas is dropped
   - 🎉 `canvasZoom`: when the canvas is zoomed
   - 🎉 `canvasZoomEnd`: when the canvas is zoomed
+  - and many more [see FullyLinkedEventEnum](src/common/event/FullyLinkedEventEnum.ts)
+- ✅ Extend with graph layouts, including DAG, force-directed, or a custom layout (coming soon)
+- ✅ Customizable edge styles (coming soon)
+
 
 ### 🔀 Example FullyLinked Graph
 ![Example FullyLinked Graph](src/example/simple/example.png)

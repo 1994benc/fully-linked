@@ -3,7 +3,8 @@
 ## [Unreleased] - 2021-12-30
 
 ### Added
-- .npmignore that ignores typescript files
+- test .npmignore file
+- add .npmignore file and then removed it
 
 ## [1.0.48] - 2021-12-30
 

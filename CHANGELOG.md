@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.58] - 2021-12-31
 ### Fixed
 - Refactored how initial zoom and pan is set so that is is more readible.
 ## [1.0.57] - 2021-12-31

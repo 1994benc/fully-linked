@@ -4,7 +4,7 @@ import { Disposer } from "../../../disposer/Disposer";
 import { CreateNewEdgeStateMaintainer } from "../../edge/stateMaintainers/CreateNewEdgeStateMaintainer";
 import { InternalNode } from "./../types/Node";
 import { addDisposableEventListener } from "../../../event/addEventListener";
-import { CanvasZoomLevelMaintainer } from "../../canvas/stateMaintainers/CanvasZoomLevelMaintainer";
+import { CanvasZoomAndTransformMaintainer } from "../../canvas/stateMaintainers/CanvasZoomAndTransformMaintainer";
 import { Edge } from "../../edge/types/Edge";
 import { setUpEdgeCreationDropZone } from "../../edge/functions/setupEdgeCreationDropZone";
 import { FullyLinkedEvent } from "../../../event/FullyLinkedEvent";
@@ -18,7 +18,7 @@ interface CreateEdgeOnAnchorDraggingParams<NodeType, EdgeType> {
   internalSVGElement: SVGSVGElement | undefined;
   edgePlaceholderId: string;
   createNewEdgeStateMaintainer: CreateNewEdgeStateMaintainer;
-  canvasZoomLevelMaintainer: CanvasZoomLevelMaintainer;
+  canvasZoomLevelMaintainer: CanvasZoomAndTransformMaintainer;
   disposer: Disposer;
   container: HTMLElement;
   nodeMapById: Map<string, InternalNode<NodeType>>;

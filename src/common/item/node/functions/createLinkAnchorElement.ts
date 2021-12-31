@@ -1,5 +1,5 @@
 import { Disposer } from "../../../disposer/Disposer";
-import { CanvasZoomLevelMaintainer } from "../../canvas/stateMaintainers/CanvasZoomLevelMaintainer";
+import { CanvasZoomAndTransformMaintainer } from "../../canvas/stateMaintainers/CanvasZoomAndTransformMaintainer";
 import { CreateNewEdgeStateMaintainer } from "../../edge/stateMaintainers/CreateNewEdgeStateMaintainer";
 import { Edge } from "../../edge/types/Edge";
 import { InternalNode } from "../types/Node";
@@ -11,7 +11,7 @@ export function createLinkAnchorElement<NodeType, EdgeType>(
   internalSVGElement: SVGSVGElement,
   edgePlaceholderId: string,
   createNewEdgeStateMaintainer: CreateNewEdgeStateMaintainer,
-  canvasZoomLevelMaintainer: CanvasZoomLevelMaintainer,
+  canvasZoomLevelMaintainer: CanvasZoomAndTransformMaintainer,
   disposer: Disposer,
   container: HTMLElement,
   nodesMapById: Map<string, InternalNode<NodeType>>,

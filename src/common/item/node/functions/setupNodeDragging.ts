@@ -1,7 +1,7 @@
 import { Disposer } from "../../../disposer/Disposer";
 import { InternalNode } from "./../types/Node";
 import { addDisposableEventListener } from "../../../event/addEventListener";
-import { CanvasZoomLevelMaintainer } from "../../canvas/stateMaintainers/CanvasZoomLevelMaintainer";
+import { CanvasZoomAndTransformMaintainer } from "../../canvas/stateMaintainers/CanvasZoomAndTransformMaintainer";
 import { getEdgePathDValue } from "../../edge/functions/getEdgePathDValue";
 import { Edge } from "../../edge/types/Edge";
 import { setNodeLinkAnchors } from "./setNodeLinkAnchors";
@@ -16,7 +16,7 @@ export interface NodeDraggingSetupParams<NodeType, EdgeType> {
   anchorEndElement: HTMLElement;
   node: InternalNode<NodeType>;
   disposer: Disposer;
-  zoomLevelMaintainer: CanvasZoomLevelMaintainer;
+  zoomLevelMaintainer: CanvasZoomAndTransformMaintainer;
   nodeMapById: Map<string, InternalNode<NodeType>>;
   getEdgeListMapByNodeId: () => Map<string, Edge<EdgeType>[]>;
   internalSVGElement: SVGSVGElement;
@@ -143,7 +143,6 @@ export function setupNodeDragging<NodeType, EdgeType>({
       dragStartY = null;
       e.stopPropagation();
       // Dispatch an event that the node drag has ended
-      // TODO: only dispatch for currently being dragged, not all of them
       const nodeDraggingEndedParams: FullyLinkedEvent<
         NodeType,
         EdgeType,

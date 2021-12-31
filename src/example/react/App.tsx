@@ -23,6 +23,11 @@ export function App() {
     const fl = new FullyLinked<MyNodeType, MyEdgeType>({
       container: graphContent.current,
       id: "graph",
+      initialCamera: {
+        panX: 0.2,
+        panY: 0.5,
+        zoomLevel: 0.5,
+      }
     });
 
     // Set up any event listeners
@@ -73,6 +78,8 @@ export function App() {
 
     fl.on(FullyLinkedEventEnum.nodeDragEnd, (e) => {
       console.log("nodeDragEnd", e);
+      console.log(fl?.getZoomLevel(), fl?.getCanvasZoomAndPan());
+
     });
 
     fl.on(FullyLinkedEventEnum.manualEdgeCreationStart, (e) => {
@@ -81,6 +88,18 @@ export function App() {
 
     fl.on(FullyLinkedEventEnum.manualEdgeCreationEndSuccessfully, (e) => {
       console.log("edgeCreated", e);
+    });
+
+    fl.on(FullyLinkedEventEnum.beforeCanvasPanAndZoom, (e) => {
+      console.log("beforeCanvasPanAndZoom", e);
+    });
+
+    fl.on(FullyLinkedEventEnum.canvasPanAndZoom, (e) => {
+      console.log("canvasPanAndZoom", e);
+    });
+
+    fl.on(FullyLinkedEventEnum.afterCanvasPanAndZoom, (e) => {
+      console.log("afterCanvasPanAndZoom", e);
     });
   }
 

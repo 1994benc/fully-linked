@@ -1,6 +1,6 @@
 import { Disposer } from "../../../disposer/Disposer";
 import { FullyLinkedOptions } from "../../../options/FullyLinkedOptions";
-import { CanvasZoomLevelMaintainer } from "../../canvas/stateMaintainers/CanvasZoomLevelMaintainer";
+import { CanvasZoomAndTransformMaintainer } from "../../canvas/stateMaintainers/CanvasZoomAndTransformMaintainer";
 import { CreateNewEdgeStateMaintainer } from "../../edge/stateMaintainers/CreateNewEdgeStateMaintainer";
 import { Edge } from "../../edge/types/Edge";
 import { createLinkAnchorElement } from "./createLinkAnchorElement";
@@ -16,7 +16,7 @@ export interface CreateSingleNodeParams<NodeType, EdgeType> {
   container: HTMLElement;
   options: FullyLinkedOptions;
   createNewEdgeStateMaintainer: CreateNewEdgeStateMaintainer;
-  canvasZoomLevelMaintainer: CanvasZoomLevelMaintainer;
+  canvasZoomLevelMaintainer: CanvasZoomAndTransformMaintainer;
   internalSVGElement: SVGSVGElement;
   edgePlaceholderId: string;
   disposer: Disposer;

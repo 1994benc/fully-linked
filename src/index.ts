@@ -7,8 +7,7 @@ import { FullyLinkedOptions } from "./common/options/FullyLinkedOptions";
 import { InternalNode } from "./common/item/node/types/Node";
 import { Edge } from "./common/item/edge/types/Edge";
 import { Node } from "./common/item/node/types/Node";
-import { setupCanvasZoomAndPan } from "./common/item/canvas/functions/setupCanvasZoomAndPan";
-import { CanvasZoomLevelMaintainer } from "./common/item/canvas/stateMaintainers/CanvasZoomLevelMaintainer";
+import { CanvasZoomAndTransformMaintainer } from "./common/item/canvas/stateMaintainers/CanvasZoomAndTransformMaintainer";
 import { createSingleEdge } from "./common/item/edge/functions/createSingleEdge";
 import {
   createSingleNode,
@@ -23,7 +22,12 @@ import { getEdgeElement } from "./common/item/edge/functions/getEdgeElement";
 import { diffItems } from "./common/item/diffItems";
 import { getNodeElement } from "./common/item/node/functions/getNodeElement";
 import { dispatchFullyLinkedEvent } from "./common/event/dispatchFullyLinkedEvent";
-import Logger from 'pino'
+import Logger from "pino";
+import {
+  MoveCameraParams,
+  moveCameraTo,
+} from "./common/item/canvas/functions/moveCameraTo";
+import * as d3 from "d3";
 const logger = Logger();
 
 const edgePlaceholderId = "placeholder-edge";
@@ -38,11 +42,18 @@ export class FullyLinked<NodeType, EdgeType> {
   /** key is a nodeId and values are edges that are linked to the node */
   private _edgeListMapByNodeId: Map<string, Edge<EdgeType>[]> = new Map();
   private _innerContainer: HTMLDivElement | undefined;
-  private _zoomLevelMaintainer: CanvasZoomLevelMaintainer =
-    new CanvasZoomLevelMaintainer();
+  private _zoomPanLevelMaintainer: CanvasZoomAndTransformMaintainer =
+    new CanvasZoomAndTransformMaintainer();
   private _createNewEdgeStateMaintainer = new CreateNewEdgeStateMaintainer();
+  private _d3ContainerSelection: d3.Selection<
+    HTMLElement,
+    any,
+    any,
+    any
+  > | null = null;
 
   public destroyed: boolean = false;
+  private _d3Zoom: d3.ZoomBehavior<HTMLElement, unknown> | null = null;
 
   constructor(options: FullyLinkedOptions) {
     this._disposer = new Disposer();
@@ -57,16 +68,21 @@ export class FullyLinked<NodeType, EdgeType> {
   }
 
   public setData(data: FullyLinkedData<NodeType, EdgeType>): void {
-
-    
     if (!this._container) {
       throw new Error("Container is not set or is undefined");
     }
 
     // First, dispatch the event that the data is about to be set
-    const beforeDatasetEventParams: FullyLinkedEvent<null, null, FullyLinkedData<NodeType, EdgeType>> = { item: null, itemType: null, info: data };
-    dispatchFullyLinkedEvent(FullyLinkedEventEnum.beforeSetData, beforeDatasetEventParams, this._container);
-
+    const beforeDatasetEventParams: FullyLinkedEvent<
+      null,
+      null,
+      FullyLinkedData<NodeType, EdgeType>
+    > = { item: null, itemType: null, info: data };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.beforeSetData,
+      beforeDatasetEventParams,
+      this._container
+    );
 
     // Clear existing data
     this._nodeMapById.clear();
@@ -103,9 +119,71 @@ export class FullyLinked<NodeType, EdgeType> {
     }
 
     // Dispatch the event that the data has been set
-    const afterSetDataEventParams: FullyLinkedEvent<null, null, FullyLinkedData<NodeType, EdgeType>> = { item: null, itemType: null, info: data };
-    dispatchFullyLinkedEvent(FullyLinkedEventEnum.afterSetData, afterSetDataEventParams, this._container);
+    const afterSetDataEventParams: FullyLinkedEvent<
+      null,
+      null,
+      FullyLinkedData<NodeType, EdgeType>
+    > = { item: null, itemType: null, info: data };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.afterSetData,
+      afterSetDataEventParams,
+      this._container
+    );
+  }
 
+  public getZoomLevel(): number {
+    return this._zoomPanLevelMaintainer.currentZoom;
+  }
+
+  public getCanvasZoomAndPan(): {
+    panX: number;
+    panY: number;
+    zoomLevel: number;
+  } {
+    return {
+      panX: this._zoomPanLevelMaintainer.transformX,
+      panY: this._zoomPanLevelMaintainer.transformY,
+      zoomLevel: this._zoomPanLevelMaintainer.currentZoom,
+    };
+  }
+
+  /** Move the visible view of the canvas (camera) by panX and panY, and zoom the camera to zoomLevel.
+   *  Only call this after calling 'render' at least once.
+   */
+  public setCanvasZoomAndPan(
+    zoomLevel: number,
+    panX: number,
+    panY: number
+  ): void {
+    if (!this._container || !this._d3ContainerSelection || !this._d3Zoom) {
+      throw new Error(
+        "Container is not set or is undefined. Call render() first."
+      );
+    }
+    this._zoomPanLevelMaintainer.currentZoom = zoomLevel;
+    this._zoomPanLevelMaintainer.transformX = panX;
+    this._zoomPanLevelMaintainer.transformY = panY;
+
+    moveCameraTo(this._d3Zoom, this._d3ContainerSelection, {
+      transform: {
+        x: panX,
+        y: panY,
+        k: zoomLevel,
+      },
+    });
+  }
+
+  /**
+   *
+   *  Only call this after calling 'render' at least once.
+   */
+  public zoomTo(level: number) {
+    if (!this._innerContainer || !this._d3Zoom || !this._d3ContainerSelection) {
+      throw new Error(
+        "Container is not set or is undefined. Have you called render() first?"
+      );
+    }
+    this._d3ContainerSelection.call(this._d3Zoom.scaleBy, level);
   }
 
   /** Initialises and renders a FullyLinked graph */
@@ -115,15 +193,23 @@ export class FullyLinked<NodeType, EdgeType> {
     }
 
     // First, dispatch the event that the graph is about to be rendered
-    const beforeRenderEventParams: FullyLinkedEvent<null, null, null> = { item: null, itemType: null, info: null };
-    dispatchFullyLinkedEvent(FullyLinkedEventEnum.beforeRender, beforeRenderEventParams, this._container);
+    const beforeRenderEventParams: FullyLinkedEvent<null, null, null> = {
+      item: null,
+      itemType: null,
+      info: null,
+    };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.beforeRender,
+      beforeRenderEventParams,
+      this._container
+    );
 
     // clear all existing content
     this._container.innerHTML = "";
 
     this.destroyed = false;
 
-    this._zoomLevelMaintainer.reset();
+    this._zoomPanLevelMaintainer.reset();
 
     this._innerContainer = document.createElement("div");
     this._innerContainer.style.width = "100%";
@@ -151,18 +237,99 @@ export class FullyLinked<NodeType, EdgeType> {
       },
     });
 
+    this.setupCanvasZoomPan();
+
+    if (this._options?.initialCamera) {
+      this.setCanvasZoomAndPan(
+        this._options.initialCamera.zoomLevel,
+        this._options.initialCamera.panX,
+        this._options.initialCamera.panY
+      );
+    }
+
     this.createNodesAndSetNodeMapById();
 
     this.createEdges();
 
-    setupCanvasZoomAndPan(
-      this._zoomLevelMaintainer,
-      this._innerContainer,
+    // Dispatch the event that the graph has been rendered
+    const afterRenderEventParams: FullyLinkedEvent<null, null, null> = {
+      item: null,
+      itemType: null,
+      info: null,
+    };
+
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.afterRender,
+      afterRenderEventParams,
       this._container
     );
-    // Dispatch the event that the graph has been rendered
-    const afterRenderEventParams: FullyLinkedEvent<null, null, null> = { item: null, itemType: null, info: null };
-    dispatchFullyLinkedEvent(FullyLinkedEventEnum.afterRender, afterRenderEventParams, this._container);
+  }
+
+  private setupCanvasZoomPan() {
+    this._d3Zoom = d3.zoom<HTMLElement, unknown>();
+
+    this._d3Zoom.on("start", (e) => {
+      const cameraMovedEventParams: FullyLinkedEvent<
+        null,
+        null,
+        MoveCameraParams
+      > = {
+        item: null,
+        itemType: null,
+        info: e,
+      };
+
+      dispatchFullyLinkedEvent(
+        FullyLinkedEventEnum.beforeCanvasPanAndZoom,
+        cameraMovedEventParams,
+        this._container as HTMLElement
+      );
+    });
+
+    this._d3Zoom.on("zoom", (e) => {
+      this._zoomPanLevelMaintainer.currentZoom = e.transform.k;
+      this._zoomPanLevelMaintainer.transformX = e.transform.x;
+      this._zoomPanLevelMaintainer.transformY = e.transform.y;
+      if (this._innerContainer) {
+        this._innerContainer.style.transform = `translate(${e.transform.x}px, ${e.transform.y}px) scale(${e.transform.k})`;
+
+        const panZoomEventParams: FullyLinkedEvent<
+          null,
+          null,
+          MoveCameraParams
+        > = {
+          item: null,
+          itemType: null,
+          info: e,
+        };
+
+        dispatchFullyLinkedEvent(
+          FullyLinkedEventEnum.canvasPanAndZoom,
+          panZoomEventParams,
+          this._container as HTMLElement
+        );
+      }
+    });
+
+    this._d3Zoom.on("end", (e) => {
+      const cameraMovedEventParams: FullyLinkedEvent<
+        null,
+        null,
+        MoveCameraParams
+      > = {
+        item: null,
+        itemType: null,
+        info: e,
+      };
+
+      dispatchFullyLinkedEvent(
+        FullyLinkedEventEnum.afterCanvasPanAndZoom,
+        cameraMovedEventParams,
+        this._container as HTMLElement
+      );
+    });
+    this._d3ContainerSelection = d3.select(this._container as HTMLElement);
+    this._d3ContainerSelection.call(this._d3Zoom);
   }
 
   /** Update the FullyLinked graph without recreating the entire new graph */
@@ -172,8 +339,16 @@ export class FullyLinked<NodeType, EdgeType> {
     }
 
     // First, dispatch the event that the data is about to be updated
-    const beforeUpdateDataEventParams: FullyLinkedEvent<null, null, FullyLinkedData<NodeType, EdgeType>> = { item: null, itemType: null, info: data };
-    dispatchFullyLinkedEvent(FullyLinkedEventEnum.beforeUpdateData, beforeUpdateDataEventParams, this._container);
+    const beforeUpdateDataEventParams: FullyLinkedEvent<
+      null,
+      null,
+      FullyLinkedData<NodeType, EdgeType>
+    > = { item: null, itemType: null, info: data };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.beforeUpdateData,
+      beforeUpdateDataEventParams,
+      this._container
+    );
 
     const existingNodes = Array.from(this._nodeMapById.values());
     const {
@@ -198,7 +373,7 @@ export class FullyLinked<NodeType, EdgeType> {
       removed: removedEdges,
       updated: updatedEdges,
     } = diffItems(existingEdges, data.edges);
-  
+
     for (const edge of addedEdges) {
       this.addOrReplaceEdge(edge);
     }
@@ -212,8 +387,16 @@ export class FullyLinked<NodeType, EdgeType> {
     }
 
     // Dispatch the event that the data has been updated
-    const afterUpdateDataEventParams: FullyLinkedEvent<null, null, FullyLinkedData<NodeType, EdgeType>> = { item: null, itemType: null, info: data };
-    dispatchFullyLinkedEvent(FullyLinkedEventEnum.afterUpdateData, afterUpdateDataEventParams, this._container);
+    const afterUpdateDataEventParams: FullyLinkedEvent<
+      null,
+      null,
+      FullyLinkedData<NodeType, EdgeType>
+    > = { item: null, itemType: null, info: data };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.afterUpdateData,
+      afterUpdateDataEventParams,
+      this._container
+    );
   }
 
   public removeNode(node: Node<NodeType>): void {
@@ -221,15 +404,31 @@ export class FullyLinked<NodeType, EdgeType> {
       throw new Error("Container is not set or is undefined");
     }
     // First, dispatch the event that the node is about to be removed
-    const beforeRemoveNodeEventParams: FullyLinkedEvent<NodeType, EdgeType, null> = { item: node, itemType: "node", info: null };
-    dispatchFullyLinkedEvent(FullyLinkedEventEnum.beforeRemoveNode, beforeRemoveNodeEventParams, this._container);
+    const beforeRemoveNodeEventParams: FullyLinkedEvent<
+      NodeType,
+      EdgeType,
+      null
+    > = { item: node, itemType: "node", info: null };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.beforeRemoveNode,
+      beforeRemoveNodeEventParams,
+      this._container
+    );
 
     // Remove node
     this.removeSingleNode(node);
 
     // Dispatch the event that the node has been removed
-    const afterRemoveNodeEventParams: FullyLinkedEvent<NodeType, EdgeType, null> = { item: node, itemType: "node", info: null };
-    dispatchFullyLinkedEvent(FullyLinkedEventEnum.afterRemoveNode, afterRemoveNodeEventParams, this._container);
+    const afterRemoveNodeEventParams: FullyLinkedEvent<
+      NodeType,
+      EdgeType,
+      null
+    > = { item: node, itemType: "node", info: null };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.afterRemoveNode,
+      afterRemoveNodeEventParams,
+      this._container
+    );
   }
 
   public removeNodeById(nodeId: string): void {
@@ -244,14 +443,30 @@ export class FullyLinked<NodeType, EdgeType> {
       throw new Error("Container is not set or is undefined");
     }
     // First, dispatch the event that the edge is about to be removed
-    const beforeRemoveEdgeEventParams: FullyLinkedEvent<NodeType, EdgeType, null> = { item: edge, itemType: "edge", info: null };
-    dispatchFullyLinkedEvent(FullyLinkedEventEnum.beforeRemoveEdge, beforeRemoveEdgeEventParams, this._container);
-    
+    const beforeRemoveEdgeEventParams: FullyLinkedEvent<
+      NodeType,
+      EdgeType,
+      null
+    > = { item: edge, itemType: "edge", info: null };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.beforeRemoveEdge,
+      beforeRemoveEdgeEventParams,
+      this._container
+    );
+
     this.removeSingleEdge(edge);
 
     // Dispatch the event that the edge has been removed
-    const afterRemoveEdgeEventParams: FullyLinkedEvent<NodeType, EdgeType, null> = { item: edge, itemType: "edge", info: null };
-    dispatchFullyLinkedEvent(FullyLinkedEventEnum.afterRemoveEdge, afterRemoveEdgeEventParams, this._container);
+    const afterRemoveEdgeEventParams: FullyLinkedEvent<
+      NodeType,
+      EdgeType,
+      null
+    > = { item: edge, itemType: "edge", info: null };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.afterRemoveEdge,
+      afterRemoveEdgeEventParams,
+      this._container
+    );
   }
 
   public removeEdgeById(id: string): void {
@@ -340,7 +555,7 @@ export class FullyLinked<NodeType, EdgeType> {
       nodeMapById: this._nodeMapById,
       edgeMapById: this._edgeMapById,
       edgeListMapByNodeId: this._edgeListMapByNodeId,
-      canvasZoomLevelMaintainer: this._zoomLevelMaintainer,
+      canvasZoomLevelMaintainer: this._zoomPanLevelMaintainer,
       createNewEdgeStateMaintainer: this._createNewEdgeStateMaintainer,
       edgePlaceholderId: edgePlaceholderId,
       disposer: this._disposer,
@@ -461,7 +676,7 @@ export class FullyLinked<NodeType, EdgeType> {
         container: this._container as HTMLElement,
         options: this._options,
         createNewEdgeStateMaintainer: this._createNewEdgeStateMaintainer,
-        canvasZoomLevelMaintainer: this._zoomLevelMaintainer,
+        canvasZoomLevelMaintainer: this._zoomPanLevelMaintainer,
         internalSVGElement: this._internalSVGElement as SVGSVGElement,
         edgePlaceholderId,
         disposer: this._disposer,

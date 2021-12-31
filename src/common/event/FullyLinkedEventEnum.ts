@@ -34,4 +34,7 @@ export enum FullyLinkedEventEnum {
   nodeDragStart = "nodeDragStart",
   nodeDragEnd = "nodeDragEnd",
   nodeDrag = "nodeDrag",
+  beforeCanvasPanAndZoom= "beforeCanvasPanAndZoom",
+  canvasPanAndZoom= "canvasPanAndZoom",
+  afterCanvasPanAndZoom= "afterCanvasPanAndZoom"
 }

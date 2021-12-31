@@ -21,6 +21,4 @@ export interface Node<T> {
 export interface InternalNode<T> extends Node<T> {
   startAnchorPoint?: { x: number; y: number };
   endAnchorPoint?: { x: number; y: number };
-  xUnadjustedByZoom?: number;
-  yUnadjustedByZoom?: number;
 }

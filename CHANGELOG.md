@@ -1,5 +1,10 @@
 # Changelog
 
+
+## [Unreleased]
+### Removed
+- Removed xUnadjustedByZoom and yUnadjustedByZoom as not needed
+
 ## [1.0.59] - 2021-12-31
 
 ### Added

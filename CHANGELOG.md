@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.57] - 2021-12-31
 ### Added
 - Ability to add initial canvas zoom and transform
 - Canvas zoom and transform events

@@ -237,6 +237,8 @@ export class FullyLinked<NodeType, EdgeType> {
       },
     });
 
+    this._d3Zoom = d3.zoom<HTMLElement, unknown>();
+
     this.setupCanvasZoomPan();
 
     if (this._options?.initialCamera) {
@@ -266,7 +268,9 @@ export class FullyLinked<NodeType, EdgeType> {
   }
 
   private setupCanvasZoomPan() {
-    this._d3Zoom = d3.zoom<HTMLElement, unknown>();
+    if (!this._d3Zoom) {
+      throw new Error("d3Zoom is not set --do--this--> this._d3Zoom = d3.zoom<HTMLElement, unknown>();");
+    };
 
     this._d3Zoom.on("start", (e) => {
       const cameraMovedEventParams: FullyLinkedEvent<

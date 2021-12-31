@@ -1,3 +1,4 @@
+import { ZoomTransform } from "d3";
 
 export interface MoveCameraParams {
   transform: {
@@ -13,6 +14,8 @@ export function moveCameraTo(
   containerSelection: d3.Selection<HTMLElement, any, any, any>,
   e: MoveCameraParams
 ) {
-  containerSelection.call(zoom.scaleBy, e.transform.k);
-  containerSelection.call(zoom.translateBy, e.transform.x, e.transform.y);
+  containerSelection.call(
+    zoom.transform,
+    new ZoomTransform(e.transform.k, e.transform.x, e.transform.y)
+  );
 }

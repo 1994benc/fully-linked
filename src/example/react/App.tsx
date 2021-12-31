@@ -24,8 +24,8 @@ export function App() {
       container: graphContent.current,
       id: "graph",
       initialCamera: {
-        panX: 0.2,
-        panY: 0.5,
+        panX: 10,
+        panY: -100,
         zoomLevel: 0.5,
       }
     });

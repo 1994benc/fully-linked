@@ -1,5 +1,8 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- Refactored how initial zoom and pan is set so that is is more readible.
 ## [1.0.57] - 2021-12-31
 ### Added
 - Ability to add initial canvas zoom and transform

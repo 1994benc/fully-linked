@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.59] - 2021-12-31
 
 ### Added
 - Add xUnadjustedByZoom and yUnadjustedByZoom to the InternalNode type so that user can use them to save the positions of the nodes and restore the positions in a new graph instance by setting the FullyLink option `initialCamera`

@@ -84,6 +84,8 @@ export function setupNodeDragging<NodeType, EdgeType>({
       const x = objInitLeft + xDelta / zoomLevelMaintainer.currentZoom;
       const yDelta = e.pageY - dragStartY;
       const y = objInitTop + yDelta / zoomLevelMaintainer.currentZoom;
+      node.xUnadjustedByZoom = objInitLeft + xDelta;
+      node.yUnadjustedByZoom = objInitTop + yDelta;
       nodeElement.style.left = x + "px";
       nodeElement.style.top = y + "px";
       node.x = x;

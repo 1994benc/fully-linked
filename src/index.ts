@@ -118,6 +118,8 @@ export class FullyLinked<NodeType, EdgeType> {
       }
     }
 
+    this.setIsRootPropertyOnNodes();
+
     // Dispatch the event that the data has been set
     const afterSetDataEventParams: FullyLinkedEvent<
       null,
@@ -129,6 +131,24 @@ export class FullyLinked<NodeType, EdgeType> {
       afterSetDataEventParams,
       this._container
     );
+  }
+
+  public getAllEdges(): Edge<EdgeType>[] {
+    return Array.from(this._edgeMapById.values());
+  }
+
+  public getAllNodes(): Node<NodeType>[] {
+    return Array.from(this._nodeMapById.values());
+  }
+
+  public isRootNode(nodeId: string): boolean {
+    let isRoot: boolean = true;
+    this._edgeListMapByNodeId.get(nodeId)?.forEach((edge) => {
+      if (edge.target === nodeId) {
+        isRoot = false;
+      }
+    });
+    return isRoot;
   }
 
   public getZoomLevel(): number {
@@ -269,8 +289,10 @@ export class FullyLinked<NodeType, EdgeType> {
 
   private setupCanvasZoomPan() {
     if (!this._d3Zoom) {
-      throw new Error("d3Zoom is not set --do--this--> this._d3Zoom = d3.zoom<HTMLElement, unknown>();");
-    };
+      throw new Error(
+        "d3Zoom is not set --do--this--> this._d3Zoom = d3.zoom<HTMLElement, unknown>();"
+      );
+    }
 
     this._d3Zoom.on("start", (e) => {
       const cameraMovedEventParams: FullyLinkedEvent<
@@ -390,6 +412,9 @@ export class FullyLinked<NodeType, EdgeType> {
       this.addOrReplaceEdge(edge);
     }
 
+    // Set isRoot property on nodes
+    this.setIsRootPropertyOnNodes();
+
     // Dispatch the event that the data has been updated
     const afterUpdateDataEventParams: FullyLinkedEvent<
       null,
@@ -401,6 +426,13 @@ export class FullyLinked<NodeType, EdgeType> {
       afterUpdateDataEventParams,
       this._container
     );
+  }
+
+  private setIsRootPropertyOnNodes() {
+    this._nodeMapById.forEach((node) => {
+      const isRoot = this.isRootNode(node.id);
+      node.isRoot = isRoot;
+    });
   }
 
   public removeNode(node: Node<NodeType>): void {
@@ -566,6 +598,13 @@ export class FullyLinked<NodeType, EdgeType> {
       getEdgeListMapByNodeId: () => this._edgeListMapByNodeId,
     };
     createSingleNode(createNodeParams);
+    const isRoot = this.isRootNode(node.id);
+    if (this._nodeMapById && this._nodeMapById.get(node.id)) {
+      const foundNode = this._nodeMapById.get(node.id);
+      if (foundNode) {
+        foundNode.isRoot = isRoot;
+      }
+    }
   }
 
   public addOrReplaceEdge = (edge: Edge<EdgeType>) => {
@@ -582,7 +621,20 @@ export class FullyLinked<NodeType, EdgeType> {
       disposer: this._disposer,
       containerElement: this._container,
     });
+
+    this.setEdgeTargetAndSourceIsRootProperty(edge);
   };
+
+  private setEdgeTargetAndSourceIsRootProperty(edge: Edge<EdgeType>) {
+    const target = this._nodeMapById.get(edge.target);
+    if (target) {
+      target.isRoot = this.isRootNode(target.id);
+    }
+    const source = this._nodeMapById.get(edge.source);
+    if (source) {
+      source.isRoot = this.isRootNode(source.id);
+    }
+  }
 
   /** Checks that an edge exists. This checks the actual element in the DOM not just in the data */
   public hasEdgeElement(id: string): boolean {

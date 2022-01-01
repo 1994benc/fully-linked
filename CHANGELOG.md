@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.61] - 2022-01-01
 ### Added
 - Add 'isRoot' property to all nodes to indicate whether they are root nodes
 

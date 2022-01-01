@@ -1,6 +1,6 @@
 {
   "name": "fully-linked",
-  "version": "1.0.60",
+  "version": "1.0.61",
   "source": "src/index.ts",
   "author": "Ben Chomsang",
   "homepage": "https://github.com/1994benc/fullylinked",

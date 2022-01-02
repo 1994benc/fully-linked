@@ -1,10 +1,5 @@
 import { ReactElement } from "react";
-
-export interface FallbackGlobalPropsType {
-    [key: string]: any;
-}
-
-export interface Node<DataType, GlobalPropsType = FallbackGlobalPropsType> {
+export interface Node<DataType, GlobalPropsType> {
   id: string;
   x: number;
   y: number;
@@ -27,7 +22,7 @@ export interface Node<DataType, GlobalPropsType = FallbackGlobalPropsType> {
 }
 
 /** ProcessedNode is a node that has been processed by FullyLinked so it is populated by various calculated properties */
-export interface ProcessedNode<NodeDataType, GlobalNodePropsType = FallbackGlobalPropsType> extends Node<NodeDataType> {
+export interface ProcessedNode<NodeDataType, GlobalNodePropsType> extends Node<NodeDataType, GlobalNodePropsType> {
   startAnchorPoint?: { x: number; y: number };
   endAnchorPoint?: { x: number; y: number };
   isRoot?: boolean;

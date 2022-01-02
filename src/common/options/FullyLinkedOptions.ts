@@ -1,6 +1,4 @@
-import { FallbackGlobalPropsType } from "../item/node/types/Node";
-
-export interface FullyLinkedOptions<GlobalNodePropsType = FallbackGlobalPropsType> {
+export interface FullyLinkedOptions<GlobalNodePropsType> {
   /** The unique id of the FullyLinked graph. */
   id: string;
   /** Element that contains your FullyLinked elements */

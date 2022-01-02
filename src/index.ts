@@ -4,10 +4,7 @@ import {
   InternalFullyLinkedData,
 } from "./common/data/types/FullyLinkedData";
 import { FullyLinkedOptions } from "./common/options/FullyLinkedOptions";
-import {
-  FallbackGlobalPropsType,
-  ProcessedNode,
-} from "./common/item/node/types/Node";
+import { ProcessedNode } from "./common/item/node/types/Node";
 import { Edge } from "./common/item/edge/types/Edge";
 import { Node } from "./common/item/node/types/Node";
 import { CanvasZoomAndTransformMaintainer } from "./common/item/canvas/stateMaintainers/CanvasZoomAndTransformMaintainer";
@@ -35,11 +32,7 @@ const logger = Logger();
 
 const edgePlaceholderId = "placeholder-edge";
 
-export class FullyLinked<
-  NodeType,
-  EdgeType,
-  GlobalNodePropsType = FallbackGlobalPropsType
-> {
+export class FullyLinked<NodeType, EdgeType, GlobalNodePropsType> {
   private _container: HTMLElement | null;
   private _options: FullyLinkedOptions<GlobalNodePropsType> | null;
   private _disposer: Disposer;
@@ -62,8 +55,8 @@ export class FullyLinked<
     any
   > | null = null;
 
-  public destroyed: boolean = false;
   private _d3Zoom: d3.ZoomBehavior<HTMLElement, unknown> | null = null;
+  public destroyed: boolean = false;
 
   constructor(options: FullyLinkedOptions<GlobalNodePropsType>) {
     this._disposer = new Disposer();
@@ -77,7 +70,9 @@ export class FullyLinked<
     });
   }
 
-  public setData(data: FullyLinkedData<NodeType, EdgeType>): void {
+  public setData(
+    data: FullyLinkedData<NodeType, EdgeType, GlobalNodePropsType>
+  ): void {
     if (!this._container) {
       throw new Error("Container is not set or is undefined");
     }
@@ -86,7 +81,7 @@ export class FullyLinked<
     const beforeDatasetEventParams: FullyLinkedEvent<
       null,
       null,
-      FullyLinkedData<NodeType, EdgeType>,
+      FullyLinkedData<NodeType, EdgeType, GlobalNodePropsType>,
       GlobalNodePropsType
     > = { item: null, itemType: null, info: data };
     dispatchFullyLinkedEvent(
@@ -105,7 +100,9 @@ export class FullyLinked<
       EdgeType,
       GlobalNodePropsType
     > = {
-      ...data,
+      id: data.id,
+      nodes: data.nodes as ProcessedNode<NodeType, GlobalNodePropsType>[],
+      edges: data.edges,
     };
     for (const node of internalData.nodes) {
       setNodeLinkAnchors(node);
@@ -139,9 +136,9 @@ export class FullyLinked<
     const afterSetDataEventParams: FullyLinkedEvent<
       null,
       null,
-      FullyLinkedData<NodeType, EdgeType>,
+      InternalFullyLinkedData<NodeType, EdgeType, GlobalNodePropsType>,
       GlobalNodePropsType
-    > = { item: null, itemType: null, info: data };
+    > = { item: null, itemType: null, info: internalData };
     dispatchFullyLinkedEvent(
       FullyLinkedEventEnum.afterSetData,
       afterSetDataEventParams,
@@ -149,14 +146,26 @@ export class FullyLinked<
     );
   }
 
+  /**
+   *
+   * @returns all edges in the graph
+   */
   public getAllEdges(): Edge<EdgeType>[] {
     return Array.from(this._edgeMapById.values());
   }
 
-  public getAllNodes(): Node<NodeType>[] {
+  /**
+   * @returns all nodes in the graph
+   */
+  public getAllNodes(): Node<NodeType, GlobalNodePropsType>[] {
     return Array.from(this._nodeMapById.values());
   }
 
+  /**
+   * Check if node is a root node, i.e. has no incoming edges
+   * @param nodeId node ID to check
+   * @returns true if node is a root node, false otherwise
+   */
   public isRootNode(nodeId: string): boolean {
     let isRoot: boolean = true;
     this._edgeListMapByNodeId.get(nodeId)?.forEach((edge) => {
@@ -167,10 +176,18 @@ export class FullyLinked<
     return isRoot;
   }
 
+  /**
+   *
+   * @returns the current zoom level of the canvas
+   */
   public getZoomLevel(): number {
     return this._zoomPanLevelMaintainer.currentZoom;
   }
 
+  /**
+   *
+   * @returns the current transform and zoom level of the canvas
+   */
   public getCanvasZoomAndPan(): {
     panX: number;
     panY: number;
@@ -184,7 +201,7 @@ export class FullyLinked<
   }
 
   /** Move the visible view of the canvas (camera) by panX and panY, and zoom the camera to zoomLevel.
-   *  Only call this after calling 'render' at least once.
+   *  IMPORTANT: Only call this after calling 'render' at least once.
    */
   public setCanvasZoomAndPan(
     zoomLevel: number,
@@ -211,7 +228,7 @@ export class FullyLinked<
 
   /**
    *
-   *  Only call this after calling 'render' at least once.
+   *  IMPORTANT: Only call this after calling 'render' at least once.
    */
   public zoomTo(level: number) {
     if (!this._innerContainer || !this._d3Zoom || !this._d3ContainerSelection) {
@@ -313,6 +330,432 @@ export class FullyLinked<
     );
   }
 
+  /** Update the FullyLinked graph without recreating the entire new graph */
+  public updateData(
+    data: FullyLinkedData<NodeType, EdgeType, GlobalNodePropsType>
+  ): void {
+    if (!this._container) {
+      throw new Error("Container is not set or is undefined");
+    }
+
+    // First, dispatch the event that the data is about to be updated
+    const beforeUpdateDataEventParams: FullyLinkedEvent<
+      null,
+      null,
+      FullyLinkedData<NodeType, EdgeType, GlobalNodePropsType>,
+      GlobalNodePropsType
+    > = { item: null, itemType: null, info: data };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.beforeUpdateData,
+      beforeUpdateDataEventParams,
+      this._container
+    );
+
+    const existingNodes = Array.from(this._nodeMapById.values());
+    const {
+      added: addedNodes,
+      removed: removedNodes,
+      updated: updatedNodes,
+    } = diffItems(existingNodes, data.nodes);
+
+    for (const node of addedNodes) {
+      this.addOrReplaceNode(node);
+    }
+    for (const node of removedNodes) {
+      this.removeNode(node);
+    }
+    for (const node of updatedNodes) {
+      this.addOrReplaceNode(node);
+    }
+
+    const existingEdges = Array.from(this._edgeMapById.values());
+    const {
+      added: addedEdges,
+      removed: removedEdges,
+      updated: updatedEdges,
+    } = diffItems(existingEdges, data.edges);
+
+    for (const edge of addedEdges) {
+      this.addOrReplaceEdge(edge);
+    }
+
+    for (const edge of removedEdges) {
+      this.removeEdge(edge);
+    }
+
+    for (const edge of updatedEdges) {
+      this.addOrReplaceEdge(edge);
+    }
+
+    // Set isRoot property on nodes
+    this.setIsRootPropertyOnNodes();
+
+    // Dispatch the event that the data has been updated
+    const afterUpdateDataEventParams: FullyLinkedEvent<
+      null,
+      null,
+      FullyLinkedData<NodeType, EdgeType, GlobalNodePropsType>,
+      GlobalNodePropsType
+    > = { item: null, itemType: null, info: data };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.afterUpdateData,
+      afterUpdateDataEventParams,
+      this._container
+    );
+  }
+
+  /**
+   * Remove a node from the graph
+   * @param node The node to remove
+   **/
+  public removeNode(node: Node<NodeType, GlobalNodePropsType>): void {
+    if (!this._container) {
+      throw new Error("Container is not set or is undefined");
+    }
+    // First, dispatch the event that the node is about to be removed
+    const beforeRemoveNodeEventParams: FullyLinkedEvent<
+      NodeType,
+      EdgeType,
+      null,
+      GlobalNodePropsType
+    > = { item: node, itemType: "node", info: null };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.beforeRemoveNode,
+      beforeRemoveNodeEventParams,
+      this._container
+    );
+
+    // Remove node
+    this.removeSingleNode(node);
+
+    // Dispatch the event that the node has been removed
+    const afterRemoveNodeEventParams: FullyLinkedEvent<
+      NodeType,
+      EdgeType,
+      null,
+      GlobalNodePropsType
+    > = { item: node, itemType: "node", info: null };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.afterRemoveNode,
+      afterRemoveNodeEventParams,
+      this._container
+    );
+  }
+
+  /**
+   * Remove a node from the graph
+   * @param nodeId the ID of the node to remove
+   * */
+  public removeNodeById(nodeId: string): void {
+    const node = this._nodeMapById.get(nodeId);
+    if (node) {
+      this.removeSingleNode(node);
+    }
+  }
+
+  /**
+   * Remove edge from the graph
+   * @param edge The edge to remove
+   */
+  public removeEdge(edge: Edge<EdgeType>): void {
+    if (!this._container) {
+      throw new Error("Container is not set or is undefined");
+    }
+    // First, dispatch the event that the edge is about to be removed
+    const beforeRemoveEdgeEventParams: FullyLinkedEvent<
+      NodeType,
+      EdgeType,
+      null,
+      GlobalNodePropsType
+    > = { item: edge, itemType: "edge", info: null };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.beforeRemoveEdge,
+      beforeRemoveEdgeEventParams,
+      this._container
+    );
+
+    this.removeSingleEdge(edge);
+
+    // Dispatch the event that the edge has been removed
+    const afterRemoveEdgeEventParams: FullyLinkedEvent<
+      NodeType,
+      EdgeType,
+      null,
+      GlobalNodePropsType
+    > = { item: edge, itemType: "edge", info: null };
+    dispatchFullyLinkedEvent(
+      FullyLinkedEventEnum.afterRemoveEdge,
+      afterRemoveEdgeEventParams,
+      this._container
+    );
+  }
+
+  /**
+   * Remove edge from the graph by ID
+   * @param id The ID of the edge to remove
+   */
+  public removeEdgeById(id: string): void {
+    const edge = this._edgeMapById.get(id);
+    if (edge) {
+      this.removeEdge(edge);
+    }
+  }
+
+  /**
+   *
+   * @param node The node to add or replace
+   */
+  public addOrReplaceNode(node: Node<NodeType, GlobalNodePropsType>): void {
+    if (this.destroyed) {
+      throw new Error("FullyLinked is destroyed");
+    }
+    if (this._nodeMapById.has(node.id)) {
+      logger.warn(`Node with id ${node.id} already exists. Replacing it.`);
+    }
+    const processedNode: ProcessedNode<NodeType, GlobalNodePropsType> = {
+      ...node,
+      id: node.id,
+      data: node.data,
+      isRoot: undefined,
+    };
+    this._nodeMapById.set(node.id, node);
+
+    if (
+      !this._innerContainer ||
+      !this._internalSVGElement ||
+      !this._container
+    ) {
+      throw new Error("Cannot add a node because FullyLinked is not rendered");
+    }
+
+    if (!this._options) {
+      throw new Error("FullyLinkedOptions is not set");
+    }
+
+    const existingNodeElement = this.getNodeElement(node.id);
+    if (existingNodeElement) {
+      existingNodeElement.remove();
+    }
+    const existingAnchorElements = this.getNodeEdgeAnchors(node.id);
+    for (const anchorElement of existingAnchorElements) {
+      anchorElement.remove();
+    }
+
+    const createNodeParams: CreateSingleNodeParams<
+      NodeType,
+      EdgeType,
+      GlobalNodePropsType
+    > = {
+      node,
+      innerContainer: this._innerContainer,
+      internalSVGElement: this._internalSVGElement,
+      container: this._container,
+      options: this._options,
+      nodeMapById: this._nodeMapById,
+      edgeMapById: this._edgeMapById,
+      edgeListMapByNodeId: this._edgeListMapByNodeId,
+      canvasZoomLevelMaintainer: this._zoomPanLevelMaintainer,
+      createNewEdgeStateMaintainer: this._createNewEdgeStateMaintainer,
+      edgePlaceholderId: edgePlaceholderId,
+      disposer: this._disposer,
+      getEdgeListMapByNodeId: () => this._edgeListMapByNodeId,
+    };
+    createSingleNode(createNodeParams);
+    const isRoot = this.isRootNode(node.id);
+    if (this._nodeMapById && this._nodeMapById.get(node.id)) {
+      const foundNode = this._nodeMapById.get(node.id);
+      if (foundNode) {
+        foundNode.isRoot = isRoot;
+      }
+    }
+  }
+
+  /**
+   * @param edge The edge to add or replace
+   * */
+  public addOrReplaceEdge(edge: Edge<EdgeType>) {
+    if (!this._container) {
+      throw new Error("Container is not set or is undefined");
+    }
+
+    createSingleEdge({
+      edge,
+      internalSVGElement: this._internalSVGElement as SVGSVGElement,
+      nodesMapById: this._nodeMapById,
+      edgesMapById: this._edgeMapById,
+      edgesMapByNodeId: this._edgeListMapByNodeId,
+      disposer: this._disposer,
+      containerElement: this._container,
+    });
+
+    this.setEdgeTargetAndSourceIsRootProperty(edge);
+  }
+
+  /** Checks that an edge exists. This checks the actual element in the DOM not just in the data */
+  public hasEdgeElement(id: string): boolean {
+    const edge = this.getEdgeElement(id);
+    return !!edge;
+  }
+
+  /** Checks that a node exists. This checks the actual element in the DOM not just in the data */
+  public hasNodeElement(id: string): boolean {
+    const node = this.getNodeElement(id);
+    return !!node;
+  }
+
+  /**
+   *
+   * @param id The id of the edge to get
+   * @returns SVG path element of the edge
+   */
+  public getEdgeElement(id: string) {
+    if (!this._internalSVGElement) {
+      throw new Error("_internalSVGElement is not available");
+    }
+    return getEdgeElement(id, this._internalSVGElement);
+  }
+
+  /**
+   *
+   * @param id The id of the node to get
+   * @returns HTML element of the node
+   */
+  public getNodeElement(id: string) {
+    if (!this._container) {
+      throw new Error("container is not available");
+    }
+    return getNodeElement(id, this._container);
+  }
+
+  /**
+   *
+   * @param nodeId The id of the node to get the edge anchors for
+   * @returns HTML elements of the edge anchors
+   */
+  public getNodeEdgeAnchors(nodeId: string) {
+    return this._container?.querySelectorAll(
+      `[data-node-id="${nodeId}"].fully-linked-node-anchor`
+    ) as NodeListOf<HTMLElement>;
+  }
+
+  /**
+   * Run some code when a FullyLinked event is fired
+   * @param eventName The name of the event to listen to
+   * @param callback The callback to call when the event is fired
+   */
+  public on<SpecificFullyLinkedEventInfo>(
+    eventName: FullyLinkedEventEnum,
+    callback: (
+      e: FullyLinkedEvent<
+        NodeType,
+        EdgeType,
+        SpecificFullyLinkedEventInfo,
+        GlobalNodePropsType
+      >
+    ) => void
+  ): void {
+    if (!this._container) {
+      throw new Error("Container is not set or is undefined");
+    }
+    addDisposableEventListener(
+      this._container,
+      eventName,
+      ((e: CustomEvent) => {
+        callback({
+          item: e.detail.item as
+            | Node<NodeType, GlobalNodePropsType>
+            | Edge<EdgeType>,
+          itemType: e.detail.itemType as "node" | "edge",
+          info: e.detail.info as SpecificFullyLinkedEventInfo,
+        });
+      }) as EventListener,
+      this._disposer
+    );
+  }
+
+  /**
+   * Destroy the graph, removing all nodes and edges, clears all event listeners, removes all DOM elements created by the graph
+   */
+  public destroy(): void {
+    this._disposer.dispose();
+    this.destroyed = true;
+  }
+
+  /************************************
+   * **********************************
+   * ************* SECTION PRIVATE ************
+   * **********************************
+   * **********************************/
+
+  /**
+   * create edge elements using the data in the edgeMapById
+   */
+  private createEdges() {
+    for (const [, edge] of this._edgeMapById.entries()) {
+      if (!this._internalSVGElement) {
+        throw new Error("SVG is not set");
+      }
+      if (!this._container) {
+        throw new Error("Container is not set");
+      }
+      createSingleEdge({
+        edge,
+        internalSVGElement: this._internalSVGElement,
+        nodesMapById: this._nodeMapById,
+        edgesMapById: this._edgeMapById,
+        edgesMapByNodeId: this._edgeListMapByNodeId,
+        disposer: this._disposer,
+        containerElement: this._container,
+      });
+    }
+  }
+
+  /**
+   * create node elements using the data in the nodeMapById
+   */
+  private createNodesAndSetNodeMapById() {
+    for (const [, node] of this._nodeMapById.entries()) {
+      this._nodeMapById.set(node.id, node);
+      if (!this._innerContainer) {
+        throw new Error("Inner container is not set");
+      }
+      if (!this._options) {
+        throw new Error("Options are not set");
+      }
+      createSingleNode({
+        node,
+        innerContainer: this._innerContainer,
+        container: this._container as HTMLElement,
+        options: this._options,
+        createNewEdgeStateMaintainer: this._createNewEdgeStateMaintainer,
+        canvasZoomLevelMaintainer: this._zoomPanLevelMaintainer,
+        internalSVGElement: this._internalSVGElement as SVGSVGElement,
+        edgePlaceholderId,
+        disposer: this._disposer,
+        nodeMapById: this._nodeMapById,
+        edgeMapById: this._edgeMapById,
+        edgeListMapByNodeId: this._edgeListMapByNodeId,
+        getEdgeListMapByNodeId: () => this._edgeListMapByNodeId,
+      });
+    }
+  }
+
+  /**
+   *
+   * Given an edge, set the target and source isRoot properties based on whether the nodes are root nodes
+   * @param edge The edge to set the properties for
+   */
+  private setEdgeTargetAndSourceIsRootProperty(edge: Edge<EdgeType>) {
+    const target = this._nodeMapById.get(edge.target);
+    if (target) {
+      target.isRoot = this.isRootNode(target.id);
+    }
+    const source = this._nodeMapById.get(edge.source);
+    if (source) {
+      source.isRoot = this.isRootNode(source.id);
+    }
+  }
+
   private setupCanvasZoomPan() {
     if (!this._d3Zoom) {
       throw new Error(
@@ -387,78 +830,9 @@ export class FullyLinked<
     this._d3ContainerSelection.call(this._d3Zoom);
   }
 
-  /** Update the FullyLinked graph without recreating the entire new graph */
-  public updateData(data: FullyLinkedData<NodeType, EdgeType>): void {
-    if (!this._container) {
-      throw new Error("Container is not set or is undefined");
-    }
-
-    // First, dispatch the event that the data is about to be updated
-    const beforeUpdateDataEventParams: FullyLinkedEvent<
-      null,
-      null,
-      FullyLinkedData<NodeType, EdgeType>,
-      GlobalNodePropsType
-    > = { item: null, itemType: null, info: data };
-    dispatchFullyLinkedEvent(
-      FullyLinkedEventEnum.beforeUpdateData,
-      beforeUpdateDataEventParams,
-      this._container
-    );
-
-    const existingNodes = Array.from(this._nodeMapById.values());
-    const {
-      added: addedNodes,
-      removed: removedNodes,
-      updated: updatedNodes,
-    } = diffItems(existingNodes, data.nodes);
-
-    for (const node of addedNodes) {
-      this.addOrReplaceNode(node);
-    }
-    for (const node of removedNodes) {
-      this.removeNode(node);
-    }
-    for (const node of updatedNodes) {
-      this.addOrReplaceNode(node);
-    }
-
-    const existingEdges = Array.from(this._edgeMapById.values());
-    const {
-      added: addedEdges,
-      removed: removedEdges,
-      updated: updatedEdges,
-    } = diffItems(existingEdges, data.edges);
-
-    for (const edge of addedEdges) {
-      this.addOrReplaceEdge(edge);
-    }
-
-    for (const edge of removedEdges) {
-      this.removeEdge(edge);
-    }
-
-    for (const edge of updatedEdges) {
-      this.addOrReplaceEdge(edge);
-    }
-
-    // Set isRoot property on nodes
-    this.setIsRootPropertyOnNodes();
-
-    // Dispatch the event that the data has been updated
-    const afterUpdateDataEventParams: FullyLinkedEvent<
-      null,
-      null,
-      FullyLinkedData<NodeType, EdgeType>,
-      GlobalNodePropsType
-    > = { item: null, itemType: null, info: data };
-    dispatchFullyLinkedEvent(
-      FullyLinkedEventEnum.afterUpdateData,
-      afterUpdateDataEventParams,
-      this._container
-    );
-  }
-
+  /**
+   * Iterate through all nodes in the FullyLinked graph (this._nodeMapById) and set the isRoot property on each node
+   */
   private setIsRootPropertyOnNodes() {
     this._nodeMapById.forEach((node) => {
       const isRoot = this.isRootNode(node.id);
@@ -466,88 +840,11 @@ export class FullyLinked<
     });
   }
 
-  public removeNode(node: Node<NodeType>): void {
-    if (!this._container) {
-      throw new Error("Container is not set or is undefined");
-    }
-    // First, dispatch the event that the node is about to be removed
-    const beforeRemoveNodeEventParams: FullyLinkedEvent<
-      NodeType,
-      EdgeType,
-      null,
-      GlobalNodePropsType
-    > = { item: node, itemType: "node", info: null };
-    dispatchFullyLinkedEvent(
-      FullyLinkedEventEnum.beforeRemoveNode,
-      beforeRemoveNodeEventParams,
-      this._container
-    );
-
-    // Remove node
-    this.removeSingleNode(node);
-
-    // Dispatch the event that the node has been removed
-    const afterRemoveNodeEventParams: FullyLinkedEvent<
-      NodeType,
-      EdgeType,
-      null,
-      GlobalNodePropsType
-    > = { item: node, itemType: "node", info: null };
-    dispatchFullyLinkedEvent(
-      FullyLinkedEventEnum.afterRemoveNode,
-      afterRemoveNodeEventParams,
-      this._container
-    );
-  }
-
-  public removeNodeById(nodeId: string): void {
-    const node = this._nodeMapById.get(nodeId);
-    if (node) {
-      this.removeSingleNode(node);
-    }
-  }
-
-  public removeEdge(edge: Edge<EdgeType>): void {
-    if (!this._container) {
-      throw new Error("Container is not set or is undefined");
-    }
-    // First, dispatch the event that the edge is about to be removed
-    const beforeRemoveEdgeEventParams: FullyLinkedEvent<
-      NodeType,
-      EdgeType,
-      null,
-      GlobalNodePropsType
-    > = { item: edge, itemType: "edge", info: null };
-    dispatchFullyLinkedEvent(
-      FullyLinkedEventEnum.beforeRemoveEdge,
-      beforeRemoveEdgeEventParams,
-      this._container
-    );
-
-    this.removeSingleEdge(edge);
-
-    // Dispatch the event that the edge has been removed
-    const afterRemoveEdgeEventParams: FullyLinkedEvent<
-      NodeType,
-      EdgeType,
-      null,
-      GlobalNodePropsType
-    > = { item: edge, itemType: "edge", info: null };
-    dispatchFullyLinkedEvent(
-      FullyLinkedEventEnum.afterRemoveEdge,
-      afterRemoveEdgeEventParams,
-      this._container
-    );
-  }
-
-  public removeEdgeById(id: string): void {
-    const edge = this._edgeMapById.get(id);
-    if (edge) {
-      this.removeEdge(edge);
-    }
-  }
-
-  private removeSingleNode(node: Node<NodeType>) {
+  /**
+   *
+   * @param node The node to remove
+   */
+  private removeSingleNode(node: Node<NodeType, GlobalNodePropsType>) {
     const nodeElement = this.getNodeElement(node.id);
     if (nodeElement) {
       nodeElement.remove();
@@ -565,6 +862,10 @@ export class FullyLinked<
     this._edgeListMapByNodeId.delete(node.id);
   }
 
+  /**
+   *
+   * @param edge The edge to remove
+   */
   private removeSingleEdge(edge: Edge<EdgeType>) {
     const edgeElement = this.getEdgeElement(edge.id);
     if (edgeElement) {
@@ -584,207 +885,6 @@ export class FullyLinked<
       if (index !== -1) {
         edgeList2.splice(index, 1);
       }
-    }
-  }
-
-  public addOrReplaceNode(node: Node<NodeType>): void {
-    if (this.destroyed) {
-      throw new Error("FullyLinked is destroyed");
-    }
-    if (this._nodeMapById.has(node.id)) {
-      logger.warn(`Node with id ${node.id} already exists. Replacing it.`);
-    }
-    this._nodeMapById.set(node.id, node);
-
-    if (
-      !this._innerContainer ||
-      !this._internalSVGElement ||
-      !this._container
-    ) {
-      throw new Error("Cannot add a node because FullyLinked is not rendered");
-    }
-
-    if (!this._options) {
-      throw new Error("FullyLinkedOptions is not set");
-    }
-
-    const existingNodeElement = this.getNodeElement(node.id);
-    if (existingNodeElement) {
-      existingNodeElement.remove();
-    }
-    const existingAnchorElements = this.getNodeEdgeAnchors(node.id);
-    for (const anchorElement of existingAnchorElements) {
-      anchorElement.remove();
-    }
-
-    const createNodeParams: CreateSingleNodeParams<
-      NodeType,
-      EdgeType,
-      GlobalNodePropsType
-    > = {
-      node,
-      innerContainer: this._innerContainer,
-      internalSVGElement: this._internalSVGElement,
-      container: this._container,
-      options: this._options,
-      nodeMapById: this._nodeMapById,
-      edgeMapById: this._edgeMapById,
-      edgeListMapByNodeId: this._edgeListMapByNodeId,
-      canvasZoomLevelMaintainer: this._zoomPanLevelMaintainer,
-      createNewEdgeStateMaintainer: this._createNewEdgeStateMaintainer,
-      edgePlaceholderId: edgePlaceholderId,
-      disposer: this._disposer,
-      getEdgeListMapByNodeId: () => this._edgeListMapByNodeId,
-    };
-    createSingleNode(createNodeParams);
-    const isRoot = this.isRootNode(node.id);
-    if (this._nodeMapById && this._nodeMapById.get(node.id)) {
-      const foundNode = this._nodeMapById.get(node.id);
-      if (foundNode) {
-        foundNode.isRoot = isRoot;
-      }
-    }
-  }
-
-  public addOrReplaceEdge = (edge: Edge<EdgeType>) => {
-    if (!this._container) {
-      throw new Error("Container is not set or is undefined");
-    }
-
-    createSingleEdge({
-      edge,
-      internalSVGElement: this._internalSVGElement as SVGSVGElement,
-      nodesMapById: this._nodeMapById,
-      edgesMapById: this._edgeMapById,
-      edgesMapByNodeId: this._edgeListMapByNodeId,
-      disposer: this._disposer,
-      containerElement: this._container,
-    });
-
-    this.setEdgeTargetAndSourceIsRootProperty(edge);
-  };
-
-  private setEdgeTargetAndSourceIsRootProperty(edge: Edge<EdgeType>) {
-    const target = this._nodeMapById.get(edge.target);
-    if (target) {
-      target.isRoot = this.isRootNode(target.id);
-    }
-    const source = this._nodeMapById.get(edge.source);
-    if (source) {
-      source.isRoot = this.isRootNode(source.id);
-    }
-  }
-
-  /** Checks that an edge exists. This checks the actual element in the DOM not just in the data */
-  public hasEdgeElement(id: string): boolean {
-    const edge = this.getEdgeElement(id);
-    return !!edge;
-  }
-
-  /** Checks that a node exists. This checks the actual element in the DOM not just in the data */
-  public hasNodeElement(id: string): boolean {
-    const node = this.getNodeElement(id);
-    return !!node;
-  }
-
-  public getEdgeElement(id: string) {
-    if (!this._internalSVGElement) {
-      throw new Error("_internalSVGElement is not available");
-    }
-    return getEdgeElement(id, this._internalSVGElement);
-  }
-
-  public getNodeElement(id: string) {
-    if (!this._container) {
-      throw new Error("container is not available");
-    }
-    return getNodeElement(id, this._container);
-  }
-
-  public getNodeEdgeAnchors(nodeId: string) {
-    return this._container?.querySelectorAll(
-      `[data-node-id="${nodeId}"].fully-linked-node-anchor`
-    ) as NodeListOf<HTMLElement>;
-  }
-
-  public on<SpecificFullyLinkedEventInfo>(
-    eventName: FullyLinkedEventEnum,
-    callback: (
-      e: FullyLinkedEvent<
-        NodeType,
-        EdgeType,
-        SpecificFullyLinkedEventInfo,
-        GlobalNodePropsType
-      >
-    ) => void
-  ): void {
-    if (!this._container) {
-      throw new Error("Container is not set or is undefined");
-    }
-    addDisposableEventListener(
-      this._container,
-      eventName,
-      ((e: CustomEvent) => {
-        callback({
-          item: e.detail.item as Node<NodeType> | Edge<EdgeType>,
-          itemType: e.detail.itemType as "node" | "edge",
-          info: e.detail.info as SpecificFullyLinkedEventInfo,
-        });
-      }) as EventListener,
-      this._disposer
-    );
-  }
-
-  public destroy(): void {
-    this._disposer.dispose();
-    this.destroyed = true;
-  }
-
-  // SECTION private methods:
-  private createEdges() {
-    for (const [, edge] of this._edgeMapById.entries()) {
-      if (!this._internalSVGElement) {
-        throw new Error("SVG is not set");
-      }
-      if (!this._container) {
-        throw new Error("Container is not set");
-      }
-      createSingleEdge({
-        edge,
-        internalSVGElement: this._internalSVGElement,
-        nodesMapById: this._nodeMapById,
-        edgesMapById: this._edgeMapById,
-        edgesMapByNodeId: this._edgeListMapByNodeId,
-        disposer: this._disposer,
-        containerElement: this._container,
-      });
-    }
-  }
-
-  private createNodesAndSetNodeMapById() {
-    for (const [, node] of this._nodeMapById.entries()) {
-      this._nodeMapById.set(node.id, node);
-      if (!this._innerContainer) {
-        throw new Error("Inner container is not set");
-      }
-      if (!this._options) {
-        throw new Error("Options are not set");
-      }
-      createSingleNode({
-        node,
-        innerContainer: this._innerContainer,
-        container: this._container as HTMLElement,
-        options: this._options,
-        createNewEdgeStateMaintainer: this._createNewEdgeStateMaintainer,
-        canvasZoomLevelMaintainer: this._zoomPanLevelMaintainer,
-        internalSVGElement: this._internalSVGElement as SVGSVGElement,
-        edgePlaceholderId,
-        disposer: this._disposer,
-        nodeMapById: this._nodeMapById,
-        edgeMapById: this._edgeMapById,
-        edgeListMapByNodeId: this._edgeListMapByNodeId,
-        getEdgeListMapByNodeId: () => this._edgeListMapByNodeId,
-      });
     }
   }
 }

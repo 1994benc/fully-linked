@@ -12,12 +12,12 @@ interface MyEdgeDataType {
   label: string;
 }
 
-const fullyLinked = new FullyLinked<MyNodeDataType, MyEdgeDataType>({
+const fullyLinked = new FullyLinked<MyNodeDataType, MyEdgeDataType, any>({
   id: "test-graph",
   container: document.getElementById("container") as HTMLDivElement,
 });
 
-const getNodeElement = (node: ProcessedNode<MyNodeDataType>) => {
+const getNodeElement = (node: ProcessedNode<MyNodeDataType, any>) => {
   const nodeElement = document.createElement("div");
   nodeElement.style.width = `${node.width}px`;
   nodeElement.style.height = `${node.height}px`;

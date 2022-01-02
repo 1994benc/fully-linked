@@ -4,7 +4,7 @@ import { CanvasZoomAndTransformMaintainer } from "../../canvas/stateMaintainers/
 import { CreateNewEdgeStateMaintainer } from "../../edge/stateMaintainers/CreateNewEdgeStateMaintainer";
 import { Edge } from "../../edge/types/Edge";
 import { createLinkAnchorElement } from "./createLinkAnchorElement";
-import { FallbackGlobalPropsType, ProcessedNode } from "../types/Node";
+import { ProcessedNode } from "../types/Node";
 import { setupNodeDragging } from "./setupNodeDragging";
 import { ReactElement } from "react";
 import * as ReactDOM from "react-dom";

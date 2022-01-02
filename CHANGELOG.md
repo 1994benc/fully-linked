@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Fixed
 - globalNodeProps not passed into nodes
+- Make GlobalNodeProps type required
 
 ## [2.0.1] - 2022-01-02
 ### Fixed

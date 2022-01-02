@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- Update readme with the new type `ProcessedNode`
+
 ## [2.0.0] - 2022-01-02
 ### Added
 - Introduce GlobalNodeProps in `FullyLinkedOptions`, which comes with a new generic type

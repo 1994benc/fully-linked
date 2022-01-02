@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.0.1] - 2022-01-02
 ### Fixed
 - Update readme with the new type `ProcessedNode`
 

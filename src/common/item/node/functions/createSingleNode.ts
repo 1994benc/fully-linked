@@ -53,6 +53,8 @@ export function createSingleNode<NodeType, EdgeType, GlobalNodePropsType>({
   nodeElementWrapper.setAttribute("data-node-id", node.id);
   nodeElementWrapper.classList.add("fully-linked-node-wrapper");
 
+  node.props = options.globalNodeProps;
+
   if (node.customNodeElementAsReactComponent) {
     nodeElement = node.customNodeElementAsReactComponent(node);
     // TODO: append react element

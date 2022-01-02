@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.1.0] - 2022-01-02
 ### Fixed
 - globalNodeProps not passed into nodes
 - Make GlobalNodeProps type required

@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- globalNodeProps not passed into nodes
+
 ## [2.0.1] - 2022-01-02
 ### Fixed
 - Update readme with the new type `ProcessedNode`

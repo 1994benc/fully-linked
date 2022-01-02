@@ -75,7 +75,7 @@ const fl = new FullyLinked<MyNodeDataType, MyEdgeDataType>({
 
 // A function to create your node template. 
 // Returns an HTML element.
-const getNodeElement = (node: InternalNode<MyNodeDataType>) => {
+const getNodeElement = (node: ProcessedNode<MyNodeDataType>) => {
   // Create a blank div element as our node container
   const nodeElement = document.createElement("div");
 

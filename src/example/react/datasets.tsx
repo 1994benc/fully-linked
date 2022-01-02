@@ -1,5 +1,5 @@
 import { FullyLinkedData } from "../../common/data/types/FullyLinkedData";
-import { InternalNode } from "../../common/item/node/types/Node";
+import { ProcessedNode } from "../../common/item/node/types/Node";
 import { NodeComponent } from "./NodeComponent";
 export interface MyNodeType {
   id: string;
@@ -12,7 +12,7 @@ export interface MyEdgeType {
   id: string;
 }
 
-const getNodeElement = (node: InternalNode<any>) => {
+const getNodeElement = (node: ProcessedNode<any>) => {
   return <NodeComponent node={node}></NodeComponent>;
 };
 

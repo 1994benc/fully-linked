@@ -1,4 +1,3 @@
-
 export interface Edge<T> {
     id: string;
     source: string;

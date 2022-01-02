@@ -1,5 +1,5 @@
 import { Disposer } from "../../../disposer/Disposer";
-import { InternalNode } from "./../types/Node";
+import { ProcessedNode } from "./../types/Node";
 import { addDisposableEventListener } from "../../../event/addEventListener";
 import { CanvasZoomAndTransformMaintainer } from "../../canvas/stateMaintainers/CanvasZoomAndTransformMaintainer";
 import { getEdgePathDValue } from "../../edge/functions/getEdgePathDValue";
@@ -10,20 +10,20 @@ import { FullyLinkedEvent } from "../../../event/FullyLinkedEvent";
 import { dispatchFullyLinkedEvent } from "../../../event/dispatchFullyLinkedEvent";
 import { FullyLinkedEventEnum } from "../../../event/FullyLinkedEventEnum";
 
-export interface NodeDraggingSetupParams<NodeType, EdgeType> {
+export interface NodeDraggingSetupParams<NodeType, EdgeType, GlobalNodePropsType> {
   nodeElement: HTMLElement;
   anchorStartElement: HTMLElement;
   anchorEndElement: HTMLElement;
-  node: InternalNode<NodeType>;
+  node: ProcessedNode<NodeType, GlobalNodePropsType>;
   disposer: Disposer;
   zoomLevelMaintainer: CanvasZoomAndTransformMaintainer;
-  nodeMapById: Map<string, InternalNode<NodeType>>;
+  nodeMapById: Map<string, ProcessedNode<NodeType>>;
   getEdgeListMapByNodeId: () => Map<string, Edge<EdgeType>[]>;
   internalSVGElement: SVGSVGElement;
   container: HTMLElement;
 }
 
-export function setupNodeDragging<NodeType, EdgeType>({
+export function setupNodeDragging<NodeType, EdgeType, GlobalNodePropsType>({
   nodeElement,
   anchorStartElement,
   anchorEndElement,
@@ -34,7 +34,7 @@ export function setupNodeDragging<NodeType, EdgeType>({
   getEdgeListMapByNodeId,
   internalSVGElement: svg,
   container,
-}: NodeDraggingSetupParams<NodeType, EdgeType>) {
+}: NodeDraggingSetupParams<NodeType, EdgeType, GlobalNodePropsType>) {
   // Inspired by @LINK https://infoheap.com/javascript-make-element-draggable/
   let dragging = false;
   let dragStartX: number | null;
@@ -47,7 +47,8 @@ export function setupNodeDragging<NodeType, EdgeType>({
     const nodeDraggingStartedParams: FullyLinkedEvent<
       NodeType,
       EdgeType,
-      MouseEvent
+      MouseEvent,
+      GlobalNodePropsType
     > = {
       item: node,
       itemType: "node",
@@ -112,7 +113,8 @@ export function setupNodeDragging<NodeType, EdgeType>({
       const nodeDraggingParams: FullyLinkedEvent<
         NodeType,
         EdgeType,
-        MouseEvent
+        MouseEvent,
+        GlobalNodePropsType
       > = {
         item: node,
         itemType: "node",
@@ -146,7 +148,8 @@ export function setupNodeDragging<NodeType, EdgeType>({
       const nodeDraggingEndedParams: FullyLinkedEvent<
         NodeType,
         EdgeType,
-        MouseEvent
+        MouseEvent,
+        GlobalNodePropsType
       > = {
         item: node,
         itemType: "node",

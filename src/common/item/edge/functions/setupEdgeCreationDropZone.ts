@@ -1,5 +1,5 @@
 import { Disposer } from "../../../disposer/Disposer";
-import { InternalNode } from "../../node/types/Node";
+import { FallbackGlobalPropsType, ProcessedNode } from "../../node/types/Node";
 import { CreateNewEdgeStateMaintainer } from "./../stateMaintainers/CreateNewEdgeStateMaintainer";
 import { addDisposableEventListener } from "../../../event/addEventListener";
 import { createSingleEdge } from "./createSingleEdge";
@@ -8,13 +8,13 @@ import { FullyLinkedEvent } from "../../../event/FullyLinkedEvent";
 import { FullyLinkedEventEnum } from "../../../event/FullyLinkedEventEnum";
 import { dispatchFullyLinkedEvent } from "../../../event/dispatchFullyLinkedEvent";
 
-export function setUpEdgeCreationDropZone<NodeType, EdgeType>(
+export function setUpEdgeCreationDropZone<NodeType, EdgeType, GlobalNodePropsType>(
   anchorStartElem: HTMLDivElement,
-  node: InternalNode<NodeType>,
+  node: ProcessedNode<NodeType, GlobalNodePropsType>,
   creatingNewEdgeStateMaintainer: CreateNewEdgeStateMaintainer,
   disposer: Disposer,
   internalSVGElement: SVGSVGElement,
-  nodesMapById: Map<string, InternalNode<NodeType>>,
+  nodesMapById: Map<string, ProcessedNode<NodeType, GlobalNodePropsType>>,
   edgesMapById: Map<string, Edge<EdgeType>>,
   edgesMapByNodeId: Map<string, Edge<EdgeType>[]>,
   containerElement: HTMLElement
@@ -54,7 +54,8 @@ export function setUpEdgeCreationDropZone<NodeType, EdgeType>(
           const edgeCreationEndSuccessfullyParams: FullyLinkedEvent<
             NodeType,
             EdgeType,
-            Edge<EdgeType>
+            Edge<EdgeType>,
+            GlobalNodePropsType
           > = {
             item: edge,
             itemType: "edge",

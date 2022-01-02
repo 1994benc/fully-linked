@@ -1,5 +1,5 @@
 import { Edge } from "../../item/edge/types/Edge";
-import { InternalNode, Node } from "../../item/node/types/Node";
+import { ProcessedNode, Node } from "../../item/node/types/Node";
 
 export interface FullyLinkedData<NodeType, EdgeType> {
   id: string;
@@ -7,6 +7,6 @@ export interface FullyLinkedData<NodeType, EdgeType> {
   edges: Edge<EdgeType>[];
 }
 
-export interface InternalFullyLinkedData<NodeType, EdgeType> extends FullyLinkedData<NodeType, EdgeType> {
-  nodes: InternalNode<NodeType>[];
+export interface InternalFullyLinkedData<NodeType, EdgeType, GlobalNodePropsType> extends FullyLinkedData<NodeType, EdgeType> {
+  nodes: ProcessedNode<NodeType, GlobalNodePropsType>[];
 }

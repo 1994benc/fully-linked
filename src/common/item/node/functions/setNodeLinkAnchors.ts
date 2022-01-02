@@ -1,6 +1,6 @@
-import { InternalNode } from "../types/Node";
+import { ProcessedNode } from "../types/Node";
 
-export function setNodeLinkAnchors<NodeType>(node: InternalNode<NodeType>) {
+export function setNodeLinkAnchors<NodeType, GlobalNodePropsType>(node: ProcessedNode<NodeType, GlobalNodePropsType>) {
   node.startAnchorPoint = {
     x: node.x,
     y: node.y + node.height / 2,

@@ -2,19 +2,19 @@ import { Disposer } from "../../../disposer/Disposer";
 import { CanvasZoomAndTransformMaintainer } from "../../canvas/stateMaintainers/CanvasZoomAndTransformMaintainer";
 import { CreateNewEdgeStateMaintainer } from "../../edge/stateMaintainers/CreateNewEdgeStateMaintainer";
 import { Edge } from "../../edge/types/Edge";
-import { InternalNode } from "../types/Node";
+import { ProcessedNode } from "../types/Node";
 import { setUpCreateEdgeOnAnchorDragging } from "./setUpCreateEdgeOnAnchorDragging";
 
 // TODO: make link anchors part of node element instead of separate elements
-export function createLinkAnchorElement<NodeType, EdgeType>(
-  node: InternalNode<NodeType>,
+export function createLinkAnchorElement<NodeType, EdgeType, GlobalNodePropsType>(
+  node: ProcessedNode<NodeType, GlobalNodePropsType>,
   internalSVGElement: SVGSVGElement,
   edgePlaceholderId: string,
   createNewEdgeStateMaintainer: CreateNewEdgeStateMaintainer,
   canvasZoomLevelMaintainer: CanvasZoomAndTransformMaintainer,
   disposer: Disposer,
   container: HTMLElement,
-  nodesMapById: Map<string, InternalNode<NodeType>>,
+  nodesMapById: Map<string, ProcessedNode<NodeType, GlobalNodePropsType>>,
   edgesMapById: Map<string, Edge<EdgeType>>,
   edgesMapByNodeId: Map<string, Edge<EdgeType>[]>
 ): { anchorStartElem: HTMLElement; anchorEndElem: HTMLElement } {

@@ -4,10 +4,11 @@ import { FullyLinkedEventEnum } from "./FullyLinkedEventEnum";
 export function dispatchFullyLinkedEvent<
   NodeType,
   EdgeType,
-  SpecificFullyLinkedEventInfo
+  SpecificFullyLinkedEventInfo,
+  GlobalNodePropsType
 >(
   eventName: FullyLinkedEventEnum,
-  params: FullyLinkedEvent<NodeType, EdgeType, SpecificFullyLinkedEventInfo>,
+  params: FullyLinkedEvent<NodeType, EdgeType, SpecificFullyLinkedEventInfo, GlobalNodePropsType>,
   containerElement: HTMLElement
 ) {
   const event = new CustomEvent(eventName, { detail: { ...params } });

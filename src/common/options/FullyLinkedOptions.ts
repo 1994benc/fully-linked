@@ -1,4 +1,6 @@
-export interface FullyLinkedOptions {
+import { FallbackGlobalPropsType } from "../item/node/types/Node";
+
+export interface FullyLinkedOptions<GlobalNodePropsType = FallbackGlobalPropsType> {
   /** The unique id of the FullyLinked graph. */
   id: string;
   /** Element that contains your FullyLinked elements */
@@ -16,6 +18,8 @@ export interface FullyLinkedOptions {
     panY: number;
     zoomLevel: number;
   };
+
+  globalNodeProps?: GlobalNodePropsType;
 
   // TODO: zoomTo
 }

@@ -3,22 +3,22 @@ import { addDisposableEventListener } from "../../../event/addEventListener";
 import { dispatchFullyLinkedEvent } from "../../../event/dispatchFullyLinkedEvent";
 import { FullyLinkedEvent } from "../../../event/FullyLinkedEvent";
 import { FullyLinkedEventEnum } from "../../../event/FullyLinkedEventEnum";
-import { InternalNode } from "../../node/types/Node";
+import { FallbackGlobalPropsType, ProcessedNode } from "../../node/types/Node";
 import { Edge } from "../types/Edge";
 import { getEdgeElement } from "./getEdgeElement";
 import { getEdgePathDValue } from "./getEdgePathDValue";
 
-interface SingleEdgeCreationParams<EdgeType, NodeType> {
+interface SingleEdgeCreationParams<EdgeType, NodeType, GlobalNodePropsType> {
   edge: Edge<EdgeType>;
   internalSVGElement: SVGSVGElement;
-  nodesMapById: Map<string, InternalNode<NodeType>>;
+  nodesMapById: Map<string, ProcessedNode<NodeType, GlobalNodePropsType>>;
   edgesMapById: Map<string, Edge<EdgeType>>;
   edgesMapByNodeId: Map<string, Edge<EdgeType>[]>;
   disposer: Disposer;
   containerElement: HTMLElement;
 }
 
-export function createSingleEdge<NodeType, EdgeType>({
+export function createSingleEdge<NodeType, EdgeType, GlobalNodePropsType>({
   edge,
   internalSVGElement: svg,
   nodesMapById,
@@ -26,7 +26,7 @@ export function createSingleEdge<NodeType, EdgeType>({
   edgesMapByNodeId,
   disposer,
   containerElement,
-}: SingleEdgeCreationParams<EdgeType, NodeType>): void {
+}: SingleEdgeCreationParams<EdgeType, NodeType, GlobalNodePropsType>): void {
   const sourceNode = nodesMapById.get(edge.source);
   const targetNode = nodesMapById.get(edge.target);
   if (!sourceNode || !targetNode) {
@@ -64,7 +64,7 @@ export function createSingleEdge<NodeType, EdgeType>({
         path,
         "click",
         (event) => {
-          const eventParams: FullyLinkedEvent<NodeType, EdgeType, Event> = {
+          const eventParams: FullyLinkedEvent<NodeType, EdgeType, Event, GlobalNodePropsType> = {
             info: event,
             item: edge,
             itemType: "edge",
@@ -82,7 +82,7 @@ export function createSingleEdge<NodeType, EdgeType>({
         path,
         "dblclick",
         (event) => {
-          const eventParams: FullyLinkedEvent<NodeType, EdgeType, Event> = {
+          const eventParams: FullyLinkedEvent<NodeType, EdgeType, Event, GlobalNodePropsType> = {
             info: event,
             item: edge,
             itemType: "edge",
@@ -101,7 +101,7 @@ export function createSingleEdge<NodeType, EdgeType>({
         "contextmenu",
         ((event: PointerEvent) => {
           event.preventDefault();
-          const eventParams: FullyLinkedEvent<NodeType, EdgeType, Event> = {
+          const eventParams: FullyLinkedEvent<NodeType, EdgeType, Event, GlobalNodePropsType> = {
             info: event,
             item: edge,
             itemType: "edge",
@@ -121,7 +121,7 @@ export function createSingleEdge<NodeType, EdgeType>({
       svg?.appendChild(path);
 
       // Dispatch event that the edge has been created
-      const eventParams: FullyLinkedEvent<NodeType, EdgeType, {}> = {
+      const eventParams: FullyLinkedEvent<NodeType, EdgeType, {}, GlobalNodePropsType> = {
         info: {},
         item: edge,
         itemType: "edge",

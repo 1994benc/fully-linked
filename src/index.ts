@@ -4,7 +4,10 @@ import {
   InternalFullyLinkedData,
 } from "./common/data/types/FullyLinkedData";
 import { FullyLinkedOptions } from "./common/options/FullyLinkedOptions";
-import { InternalNode } from "./common/item/node/types/Node";
+import {
+  FallbackGlobalPropsType,
+  ProcessedNode,
+} from "./common/item/node/types/Node";
 import { Edge } from "./common/item/edge/types/Edge";
 import { Node } from "./common/item/node/types/Node";
 import { CanvasZoomAndTransformMaintainer } from "./common/item/canvas/stateMaintainers/CanvasZoomAndTransformMaintainer";
@@ -32,12 +35,19 @@ const logger = Logger();
 
 const edgePlaceholderId = "placeholder-edge";
 
-export class FullyLinked<NodeType, EdgeType> {
+export class FullyLinked<
+  NodeType,
+  EdgeType,
+  GlobalNodePropsType = FallbackGlobalPropsType
+> {
   private _container: HTMLElement | null;
-  private _options: FullyLinkedOptions | null;
+  private _options: FullyLinkedOptions<GlobalNodePropsType> | null;
   private _disposer: Disposer;
   private _internalSVGElement: SVGSVGElement | undefined;
-  private _nodeMapById: Map<string, InternalNode<NodeType>> = new Map();
+  private _nodeMapById: Map<
+    string,
+    ProcessedNode<NodeType, GlobalNodePropsType>
+  > = new Map();
   private _edgeMapById: Map<string, Edge<EdgeType>> = new Map();
   /** key is a nodeId and values are edges that are linked to the node */
   private _edgeListMapByNodeId: Map<string, Edge<EdgeType>[]> = new Map();
@@ -55,7 +65,7 @@ export class FullyLinked<NodeType, EdgeType> {
   public destroyed: boolean = false;
   private _d3Zoom: d3.ZoomBehavior<HTMLElement, unknown> | null = null;
 
-  constructor(options: FullyLinkedOptions) {
+  constructor(options: FullyLinkedOptions<GlobalNodePropsType>) {
     this._disposer = new Disposer();
     this._options = options;
     this._container = options.container;
@@ -76,7 +86,8 @@ export class FullyLinked<NodeType, EdgeType> {
     const beforeDatasetEventParams: FullyLinkedEvent<
       null,
       null,
-      FullyLinkedData<NodeType, EdgeType>
+      FullyLinkedData<NodeType, EdgeType>,
+      GlobalNodePropsType
     > = { item: null, itemType: null, info: data };
     dispatchFullyLinkedEvent(
       FullyLinkedEventEnum.beforeSetData,
@@ -89,7 +100,11 @@ export class FullyLinked<NodeType, EdgeType> {
     this._edgeMapById.clear();
     this._edgeListMapByNodeId.clear();
 
-    const internalData: InternalFullyLinkedData<NodeType, EdgeType> = {
+    const internalData: InternalFullyLinkedData<
+      NodeType,
+      EdgeType,
+      GlobalNodePropsType
+    > = {
       ...data,
     };
     for (const node of internalData.nodes) {
@@ -124,7 +139,8 @@ export class FullyLinked<NodeType, EdgeType> {
     const afterSetDataEventParams: FullyLinkedEvent<
       null,
       null,
-      FullyLinkedData<NodeType, EdgeType>
+      FullyLinkedData<NodeType, EdgeType>,
+      GlobalNodePropsType
     > = { item: null, itemType: null, info: data };
     dispatchFullyLinkedEvent(
       FullyLinkedEventEnum.afterSetData,
@@ -213,7 +229,12 @@ export class FullyLinked<NodeType, EdgeType> {
     }
 
     // First, dispatch the event that the graph is about to be rendered
-    const beforeRenderEventParams: FullyLinkedEvent<null, null, null> = {
+    const beforeRenderEventParams: FullyLinkedEvent<
+      null,
+      null,
+      null,
+      GlobalNodePropsType
+    > = {
       item: null,
       itemType: null,
       info: null,
@@ -274,7 +295,12 @@ export class FullyLinked<NodeType, EdgeType> {
     this.createEdges();
 
     // Dispatch the event that the graph has been rendered
-    const afterRenderEventParams: FullyLinkedEvent<null, null, null> = {
+    const afterRenderEventParams: FullyLinkedEvent<
+      null,
+      null,
+      null,
+      GlobalNodePropsType
+    > = {
       item: null,
       itemType: null,
       info: null,
@@ -298,7 +324,8 @@ export class FullyLinked<NodeType, EdgeType> {
       const cameraMovedEventParams: FullyLinkedEvent<
         null,
         null,
-        MoveCameraParams
+        MoveCameraParams,
+        GlobalNodePropsType
       > = {
         item: null,
         itemType: null,
@@ -322,7 +349,8 @@ export class FullyLinked<NodeType, EdgeType> {
         const panZoomEventParams: FullyLinkedEvent<
           null,
           null,
-          MoveCameraParams
+          MoveCameraParams,
+          GlobalNodePropsType
         > = {
           item: null,
           itemType: null,
@@ -341,7 +369,8 @@ export class FullyLinked<NodeType, EdgeType> {
       const cameraMovedEventParams: FullyLinkedEvent<
         null,
         null,
-        MoveCameraParams
+        MoveCameraParams,
+        GlobalNodePropsType
       > = {
         item: null,
         itemType: null,
@@ -368,7 +397,8 @@ export class FullyLinked<NodeType, EdgeType> {
     const beforeUpdateDataEventParams: FullyLinkedEvent<
       null,
       null,
-      FullyLinkedData<NodeType, EdgeType>
+      FullyLinkedData<NodeType, EdgeType>,
+      GlobalNodePropsType
     > = { item: null, itemType: null, info: data };
     dispatchFullyLinkedEvent(
       FullyLinkedEventEnum.beforeUpdateData,
@@ -419,7 +449,8 @@ export class FullyLinked<NodeType, EdgeType> {
     const afterUpdateDataEventParams: FullyLinkedEvent<
       null,
       null,
-      FullyLinkedData<NodeType, EdgeType>
+      FullyLinkedData<NodeType, EdgeType>,
+      GlobalNodePropsType
     > = { item: null, itemType: null, info: data };
     dispatchFullyLinkedEvent(
       FullyLinkedEventEnum.afterUpdateData,
@@ -443,7 +474,8 @@ export class FullyLinked<NodeType, EdgeType> {
     const beforeRemoveNodeEventParams: FullyLinkedEvent<
       NodeType,
       EdgeType,
-      null
+      null,
+      GlobalNodePropsType
     > = { item: node, itemType: "node", info: null };
     dispatchFullyLinkedEvent(
       FullyLinkedEventEnum.beforeRemoveNode,
@@ -458,7 +490,8 @@ export class FullyLinked<NodeType, EdgeType> {
     const afterRemoveNodeEventParams: FullyLinkedEvent<
       NodeType,
       EdgeType,
-      null
+      null,
+      GlobalNodePropsType
     > = { item: node, itemType: "node", info: null };
     dispatchFullyLinkedEvent(
       FullyLinkedEventEnum.afterRemoveNode,
@@ -482,7 +515,8 @@ export class FullyLinked<NodeType, EdgeType> {
     const beforeRemoveEdgeEventParams: FullyLinkedEvent<
       NodeType,
       EdgeType,
-      null
+      null,
+      GlobalNodePropsType
     > = { item: edge, itemType: "edge", info: null };
     dispatchFullyLinkedEvent(
       FullyLinkedEventEnum.beforeRemoveEdge,
@@ -496,7 +530,8 @@ export class FullyLinked<NodeType, EdgeType> {
     const afterRemoveEdgeEventParams: FullyLinkedEvent<
       NodeType,
       EdgeType,
-      null
+      null,
+      GlobalNodePropsType
     > = { item: edge, itemType: "edge", info: null };
     dispatchFullyLinkedEvent(
       FullyLinkedEventEnum.afterRemoveEdge,
@@ -582,7 +617,11 @@ export class FullyLinked<NodeType, EdgeType> {
       anchorElement.remove();
     }
 
-    const createNodeParams: CreateSingleNodeParams<NodeType, EdgeType> = {
+    const createNodeParams: CreateSingleNodeParams<
+      NodeType,
+      EdgeType,
+      GlobalNodePropsType
+    > = {
       node,
       innerContainer: this._innerContainer,
       internalSVGElement: this._internalSVGElement,
@@ -671,7 +710,12 @@ export class FullyLinked<NodeType, EdgeType> {
   public on<SpecificFullyLinkedEventInfo>(
     eventName: FullyLinkedEventEnum,
     callback: (
-      e: FullyLinkedEvent<NodeType, EdgeType, SpecificFullyLinkedEventInfo>
+      e: FullyLinkedEvent<
+        NodeType,
+        EdgeType,
+        SpecificFullyLinkedEventInfo,
+        GlobalNodePropsType
+      >
     ) => void
   ): void {
     if (!this._container) {

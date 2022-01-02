@@ -1,10 +1,10 @@
 import * as d3 from "d3";
 import { curveBumpX } from "d3";
-import { InternalNode } from "../../node/types/Node";
+import { FallbackGlobalPropsType, ProcessedNode } from "../../node/types/Node";
 import { Edge } from "../types/Edge";
 
-export function getEdgePathDValue<NodeType, EdgeType>(
-  nodesMapById: Map<string, InternalNode<NodeType>>,
+export function getEdgePathDValue<NodeType, EdgeType, GlobalNodePropsType>(
+  nodesMapById: Map<string, ProcessedNode<NodeType, GlobalNodePropsType>>,
   edge: Edge<EdgeType>
 ): string | null {
   const sourceNode = nodesMapById.get(edge.source);

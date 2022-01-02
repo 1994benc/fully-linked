@@ -1,25 +1,37 @@
 import { ReactElement } from "react";
-export interface Node<T> {
+
+export interface FallbackGlobalPropsType {
+    [key: string]: any;
+}
+
+export interface Node<DataType, GlobalPropsType = FallbackGlobalPropsType> {
   id: string;
   x: number;
   y: number;
   width: number;
   height: number;
-  data: T;
+  data: DataType;
   /**
    * A function that returns an HTMLElement representing a node.
    * If this is not defined, a default node element will be created.
    */
-  customNodeElement?: (node: InternalNode<T>) => HTMLElement;
+  customNodeElement?: (
+    node: ProcessedNode<DataType, GlobalPropsType>
+  ) => HTMLElement;
   /** A function that returns a react component representing a node.
    *  This will override the default node element and customNodeElement
    */
-  customNodeElementAsReactComponent?: (node: InternalNode<T>) => ReactElement;
-  selector?: string;
+  customNodeElementAsReactComponent?: (
+    node: ProcessedNode<DataType, GlobalPropsType>
+  ) => ReactElement;
 }
 
-export interface InternalNode<T> extends Node<T> {
+/** ProcessedNode is a node that has been processed by FullyLinked so it is populated by various calculated properties */
+export interface ProcessedNode<NodeDataType, GlobalNodePropsType = FallbackGlobalPropsType> extends Node<NodeDataType> {
   startAnchorPoint?: { x: number; y: number };
   endAnchorPoint?: { x: number; y: number };
   isRoot?: boolean;
+
+  /** This is the `globalNodeProps` property in the FullyLinkedOptions (if specified) */
+  props?: GlobalNodePropsType;
 }

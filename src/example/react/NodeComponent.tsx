@@ -1,7 +1,7 @@
-import { InternalNode } from "../../common/item/node/types/Node";
+import { ProcessedNode } from "../../common/item/node/types/Node";
 import { MyNodeType } from "./datasets";
 
-export function NodeComponent(props: { node: InternalNode<MyNodeType>; }) {
+export function NodeComponent(props: { node: ProcessedNode<MyNodeType>; }) {
   const onClick = () => {
     console.log(`Clicked node ${props.node.data.label}`);
   };

@@ -1,5 +1,5 @@
 
-import { InternalNode } from "../../common/item/node/types/Node";
+import { ProcessedNode } from "../../common/item/node/types/Node";
 import { FullyLinked } from "../../index";
 
 interface MyNodeDataType {
@@ -17,7 +17,7 @@ const fullyLinked = new FullyLinked<MyNodeDataType, MyEdgeDataType>({
   container: document.getElementById("container") as HTMLDivElement,
 });
 
-const getNodeElement = (node: InternalNode<MyNodeDataType>) => {
+const getNodeElement = (node: ProcessedNode<MyNodeDataType>) => {
   const nodeElement = document.createElement("div");
   nodeElement.style.width = `${node.width}px`;
   nodeElement.style.height = `${node.height}px`;

@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Added
+- Introduce GlobalNodeProps in `FullyLinkedOptions`, which comes with a new generic type
+- Rename InternalNode to ProcessedNode to reflect the fact that it is a node processed by FullyLinked
 ## [1.0.61] - 2022-01-01
 ### Added
 - Add 'isRoot' property to all nodes to indicate whether they are root nodes

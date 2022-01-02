@@ -4,29 +4,29 @@ import { CanvasZoomAndTransformMaintainer } from "../../canvas/stateMaintainers/
 import { CreateNewEdgeStateMaintainer } from "../../edge/stateMaintainers/CreateNewEdgeStateMaintainer";
 import { Edge } from "../../edge/types/Edge";
 import { createLinkAnchorElement } from "./createLinkAnchorElement";
-import { InternalNode } from "../types/Node";
+import { FallbackGlobalPropsType, ProcessedNode } from "../types/Node";
 import { setupNodeDragging } from "./setupNodeDragging";
 import { ReactElement } from "react";
 import * as ReactDOM from "react-dom";
 import { setNodeLinkAnchors } from "./setNodeLinkAnchors";
 
-export interface CreateSingleNodeParams<NodeType, EdgeType> {
-  node: InternalNode<NodeType>;
+export interface CreateSingleNodeParams<NodeType, EdgeType, GlobalNodePropsType> {
+  node: ProcessedNode<NodeType, GlobalNodePropsType>;
   innerContainer: HTMLElement;
   container: HTMLElement;
-  options: FullyLinkedOptions;
+  options: FullyLinkedOptions<GlobalNodePropsType>;
   createNewEdgeStateMaintainer: CreateNewEdgeStateMaintainer;
   canvasZoomLevelMaintainer: CanvasZoomAndTransformMaintainer;
   internalSVGElement: SVGSVGElement;
   edgePlaceholderId: string;
   disposer: Disposer;
-  nodeMapById: Map<string, InternalNode<NodeType>>;
+  nodeMapById: Map<string, ProcessedNode<NodeType, GlobalNodePropsType>>;
   edgeMapById: Map<string, Edge<EdgeType>>;
   edgeListMapByNodeId: Map<string, Edge<EdgeType>[]>;
   getEdgeListMapByNodeId: () => Map<string, Edge<EdgeType>[]>;
 }
 
-export function createSingleNode<NodeType, EdgeType>({
+export function createSingleNode<NodeType, EdgeType, GlobalNodePropsType>({
   node,
   innerContainer,
   container,
@@ -40,7 +40,7 @@ export function createSingleNode<NodeType, EdgeType>({
   edgeMapById: edgesMapById,
   edgeListMapByNodeId: edgesMapByNodeId,
   getEdgeListMapByNodeId
-}: CreateSingleNodeParams<NodeType, EdgeType>) {
+}: CreateSingleNodeParams<NodeType, EdgeType, GlobalNodePropsType>) {
   let nodeElement: HTMLElement | ReactElement;
   let nodeElementWrapper: HTMLElement = document.createElement("div");
   nodeElementWrapper.style.position = "absolute";

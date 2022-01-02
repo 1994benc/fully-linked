@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.0.0] - 2022-01-02
 ### Added
 - Introduce GlobalNodeProps in `FullyLinkedOptions`, which comes with a new generic type
 - Rename InternalNode to ProcessedNode to reflect the fact that it is a node processed by FullyLinked

@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- Enums not exported
+- Issue with imported ReactElement Type in d.ts
+
 ## [2.1.0] - 2022-01-02
 ### Fixed
 - globalNodeProps not passed into nodes

@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.1.1] - 2022-01-05
 ### Fixed
 - Enums not exported
 - Issue with imported ReactElement Type in d.ts

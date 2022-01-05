@@ -1,9 +1,9 @@
+import { FullyLinkedEventEnum } from "../../../..";
 import { Disposer } from "../../../disposer/Disposer";
 import { addDisposableEventListener } from "../../../event/addEventListener";
 import { dispatchFullyLinkedEvent } from "../../../event/dispatchFullyLinkedEvent";
 import { FullyLinkedEvent } from "../../../event/FullyLinkedEvent";
-import { FullyLinkedEventEnum } from "../../../event/FullyLinkedEventEnum";
-import { FallbackGlobalPropsType, ProcessedNode } from "../../node/types/Node";
+import { ProcessedNode } from "../../node/types/Node";
 import { Edge } from "../types/Edge";
 import { getEdgeElement } from "./getEdgeElement";
 import { getEdgePathDValue } from "./getEdgePathDValue";

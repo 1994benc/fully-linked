@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { FullyLinked } from "../..";
+import { FullyLinked, FullyLinkedEventEnum } from "../..";
 import { FullyLinkedData } from "../../common/data/types/FullyLinkedData";
-import { FullyLinkedEventEnum } from "../../common/event/FullyLinkedEventEnum";
 import { datasetById, MyEdgeType, MyNodeType } from "./datasets";
 
 export function App() {
   const [fullyLinkedInstance, setFullyLinkedInstance] = useState<FullyLinked<
     MyNodeType,
-    MyEdgeType
+    MyEdgeType,
+    any
   > | null>(null);
   const graphContent = useRef<HTMLDivElement>(null);
 
@@ -20,7 +20,7 @@ export function App() {
       fullyLinkedInstance.destroy();
     }
 
-    const fl = new FullyLinked<MyNodeType, MyEdgeType>({
+    const fl = new FullyLinked<MyNodeType, MyEdgeType, any>({
       container: graphContent.current,
       id: "graph",
       initialCamera: {
@@ -50,7 +50,7 @@ export function App() {
   }, []);
 
   function setUpFullyLinkedEventListeners(
-    fl: FullyLinked<MyNodeType, MyEdgeType>
+    fl: FullyLinked<MyNodeType, MyEdgeType, any>
   ) {
     fl.on(FullyLinkedEventEnum.beforeSetData, (e) => {
       console.log("beforeSetData", e);
@@ -103,7 +103,7 @@ export function App() {
     });
   }
 
-  const changeData = (dataset: FullyLinkedData<MyNodeType, MyEdgeType>) => {
+  const changeData = (dataset: FullyLinkedData<MyNodeType, MyEdgeType, any>) => {
     // Change data without recreating the entire FullyLinked graph
     // FullyLinked will internally figure out which items have changed and update them accordingly
     fullyLinkedInstance?.updateData(dataset);

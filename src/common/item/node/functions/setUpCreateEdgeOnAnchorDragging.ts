@@ -9,7 +9,7 @@ import { Edge } from "../../edge/types/Edge";
 import { setUpEdgeCreationDropZone } from "../../edge/functions/setupEdgeCreationDropZone";
 import { FullyLinkedEvent } from "../../../event/FullyLinkedEvent";
 import { dispatchFullyLinkedEvent } from "../../../event/dispatchFullyLinkedEvent";
-import { FullyLinkedEventEnum } from "../../../event/FullyLinkedEventEnum";
+import { FullyLinkedEventEnum } from "../../../..";
 
 interface CreateEdgeOnAnchorDraggingParams<NodeType, EdgeType, GlobalNodePropsType> {
   anchorEndElem: HTMLDivElement;

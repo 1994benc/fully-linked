@@ -1,5 +1,5 @@
+import { FullyLinkedEventEnum } from "../..";
 import { FullyLinkedEvent } from "./FullyLinkedEvent";
-import { FullyLinkedEventEnum } from "./FullyLinkedEventEnum";
 
 export function dispatchFullyLinkedEvent<
   NodeType,

@@ -1,5 +1,5 @@
+import { FullyLinkedEventEnum } from "../..";
 import { Disposer } from "../disposer/Disposer";
-import { FullyLinkedEventEnum } from "./FullyLinkedEventEnum";
 
 export const addDisposableEventListener = (
   element: Element | Document,

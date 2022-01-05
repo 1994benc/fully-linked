@@ -1,12 +1,12 @@
 import { Disposer } from "../../../disposer/Disposer";
-import { FallbackGlobalPropsType, ProcessedNode } from "../../node/types/Node";
+import {  ProcessedNode } from "../../node/types/Node";
 import { CreateNewEdgeStateMaintainer } from "./../stateMaintainers/CreateNewEdgeStateMaintainer";
 import { addDisposableEventListener } from "../../../event/addEventListener";
 import { createSingleEdge } from "./createSingleEdge";
 import { Edge } from "./../types/Edge";
 import { FullyLinkedEvent } from "../../../event/FullyLinkedEvent";
-import { FullyLinkedEventEnum } from "../../../event/FullyLinkedEventEnum";
 import { dispatchFullyLinkedEvent } from "../../../event/dispatchFullyLinkedEvent";
+import { FullyLinkedEventEnum } from "../../../..";
 
 export function setUpEdgeCreationDropZone<NodeType, EdgeType, GlobalNodePropsType>(
   anchorStartElem: HTMLDivElement,

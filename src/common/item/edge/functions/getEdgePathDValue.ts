@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import { curveBumpX } from "d3";
-import { FallbackGlobalPropsType, ProcessedNode } from "../../node/types/Node";
+import { ProcessedNode } from "../../node/types/Node";
 import { Edge } from "../types/Edge";
 
 export function getEdgePathDValue<NodeType, EdgeType, GlobalNodePropsType>(

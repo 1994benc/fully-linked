@@ -8,7 +8,7 @@ import { setNodeLinkAnchors } from "./setNodeLinkAnchors";
 import { NODE_DRAGGING_DISPOSER_KEY } from "../../../disposer/disposerKeys";
 import { FullyLinkedEvent } from "../../../event/FullyLinkedEvent";
 import { dispatchFullyLinkedEvent } from "../../../event/dispatchFullyLinkedEvent";
-import { FullyLinkedEventEnum } from "../../../event/FullyLinkedEventEnum";
+import { FullyLinkedEventEnum } from "../../../..";
 
 export interface NodeDraggingSetupParams<NodeType, EdgeType, GlobalNodePropsType> {
   nodeElement: HTMLElement;
@@ -17,7 +17,7 @@ export interface NodeDraggingSetupParams<NodeType, EdgeType, GlobalNodePropsType
   node: ProcessedNode<NodeType, GlobalNodePropsType>;
   disposer: Disposer;
   zoomLevelMaintainer: CanvasZoomAndTransformMaintainer;
-  nodeMapById: Map<string, ProcessedNode<NodeType>>;
+  nodeMapById: Map<string, ProcessedNode<NodeType, GlobalNodePropsType>>;
   getEdgeListMapByNodeId: () => Map<string, Edge<EdgeType>[]>;
   internalSVGElement: SVGSVGElement;
   container: HTMLElement;

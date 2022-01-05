@@ -15,7 +15,6 @@ import {
 } from "./common/item/node/functions/createSingleNode";
 import { CreateNewEdgeStateMaintainer } from "./common/item/edge/stateMaintainers/CreateNewEdgeStateMaintainer";
 import { setNodeLinkAnchors } from "./common/item/node/functions/setNodeLinkAnchors";
-import { FullyLinkedEventEnum } from "./common/event/FullyLinkedEventEnum";
 import { addDisposableEventListener } from "./common/event/addEventListener";
 import { FullyLinkedEvent } from "./common/event/FullyLinkedEvent";
 import { getEdgeElement } from "./common/item/edge/functions/getEdgeElement";
@@ -32,6 +31,46 @@ const logger = Logger();
 
 const edgePlaceholderId = "placeholder-edge";
 
+export enum FullyLinkedEventEnum {
+  // The following events are not yet implemented:
+  //   edgeCreationCancel = "edgeCreationCancel",
+  //   canvasClick = "canvasClick",
+  //   canvasDblClick = "canvasDblClick",
+  //   canvasRightClick = "canvasRightClick",
+  //   canvasDragStart = "canvasDragStart",
+  //   canvasDragEnd = "canvasDragEnd",
+  //   canvasDrag = "canvasDrag",
+  //   canvasZoom = "canvasZoom",
+  //   canvasZoomStart = "canvasZoomStart",
+  //   canvasZoomEnd = "canvasZoomEnd",
+
+  //   The following are available to use:
+  beforeUpdateData = "beforeUpdateData",
+  afterUpdateData = "afterUpdateData",
+  beforeRemoveNode = "beforeRemoveNode",
+  afterRemoveNode = "afterRemoveNode",
+  beforeRemoveEdge = "beforeRemoveEdge",
+  afterRemoveEdge = "afterRemoveEdge",
+  beforeSetData = "beforeSetData",
+  afterSetData = "afterSetData",
+  beforeRender = "beforeRender",
+  afterRender = "afterRender",
+  edgeClick = "edgeClick",
+  edgeDblClick = "edgeDblClick",
+  edgeRightClick = "edgeRightClick",
+  /** Only fired when user starts to create a new edge by dragging a node link anchor */
+  manualEdgeCreationStart = "manualEdgeCreationStart",
+  /** Fired everytime an edge has been created regardless of the method used */
+  edgeCreated = "edgeCreated",
+  /** Fired when user has finished creating an edge by dropping the new edge into the target's link anchor */
+  manualEdgeCreationEndSuccessfully = "manualEdgeCreationEndSuccessfully",
+  nodeDragStart = "nodeDragStart",
+  nodeDragEnd = "nodeDragEnd",
+  nodeDrag = "nodeDrag",
+  beforeCanvasPanAndZoom = "beforeCanvasPanAndZoom",
+  canvasPanAndZoom = "canvasPanAndZoom",
+  afterCanvasPanAndZoom = "afterCanvasPanAndZoom",
+}
 export class FullyLinked<NodeType, EdgeType, GlobalNodePropsType> {
   private _container: HTMLElement | null;
   private _options: FullyLinkedOptions<GlobalNodePropsType> | null;

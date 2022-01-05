@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import * as react from "react";
 export interface Node<DataType, GlobalPropsType> {
   id: string;
   x: number;
@@ -18,7 +18,7 @@ export interface Node<DataType, GlobalPropsType> {
    */
   customNodeElementAsReactComponent?: (
     node: ProcessedNode<DataType, GlobalPropsType>
-  ) => ReactElement;
+  ) => react.ReactElement;
 }
 
 /** ProcessedNode is a node that has been processed by FullyLinked so it is populated by various calculated properties */

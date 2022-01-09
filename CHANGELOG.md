@@ -1,5 +1,8 @@
 # Changelog
 
+## [Unreleased]
+### Added
+- Ability to customize edge styles
 ## [2.1.1] - 2022-01-05
 ### Fixed
 - Enums not exported

@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.2.0] - 2022-01-09
 ### Added
 - Ability to customize edge styles
 ## [2.1.1] - 2022-01-05

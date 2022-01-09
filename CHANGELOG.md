@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- Node not draggable if x and y are initially 0
+
 ## [2.2.0] - 2022-01-09
 ### Added
 - Ability to customize edge styles

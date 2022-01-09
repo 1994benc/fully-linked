@@ -10,7 +10,11 @@ import { FullyLinkedEvent } from "../../../event/FullyLinkedEvent";
 import { dispatchFullyLinkedEvent } from "../../../event/dispatchFullyLinkedEvent";
 import { FullyLinkedEventEnum } from "../../../..";
 
-export interface NodeDraggingSetupParams<NodeType, EdgeType, GlobalNodePropsType> {
+export interface NodeDraggingSetupParams<
+  NodeType,
+  EdgeType,
+  GlobalNodePropsType
+> {
   nodeElement: HTMLElement;
   anchorStartElement: HTMLElement;
   anchorEndElement: HTMLElement;
@@ -78,7 +82,13 @@ export function setupNodeDragging<NodeType, EdgeType, GlobalNodePropsType>({
     NODE_DRAGGING_DISPOSER_KEY
   );
   const onMouseMove = (e: MouseEvent): void => {
-    if (dragging && objInitLeft && objInitTop && dragStartX && dragStartY) {
+    if (
+      dragging &&
+      typeof objInitLeft === "number" &&
+      typeof objInitTop === "number" &&
+      typeof dragStartX === "number" &&
+      typeof dragStartY === "number"
+    ) {
       e.stopPropagation();
       // xDelta and yDelta are the difference between current mouse position and the position on mousedown
       const xDelta = e.pageX - dragStartX;

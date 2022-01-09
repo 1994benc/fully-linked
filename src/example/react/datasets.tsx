@@ -12,12 +12,12 @@ export interface MyEdgeType {
   id: string;
 }
 
-const getNodeElement = (node: ProcessedNode<any>) => {
+const getNodeElement = (node: ProcessedNode<any, any>) => {
   return <NodeComponent node={node}></NodeComponent>;
 };
 
 export const datasetById: {
-  [id: string]: FullyLinkedData<MyNodeType, MyEdgeType>;
+  [id: string]: FullyLinkedData<MyNodeType, MyEdgeType, any>;
 } = {
   test_1: {
     nodes: [
@@ -106,6 +106,9 @@ export const datasetById: {
         source: "1",
         target: "2",
         data: { id: "1", label: "Edge 1" },
+        styles: {
+          stroke: "red",
+        }
       },
       {
         id: "2",

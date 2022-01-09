@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.2.1] - 2022-01-09
 ### Fixed
 - Node not draggable if x and y are initially 0
 

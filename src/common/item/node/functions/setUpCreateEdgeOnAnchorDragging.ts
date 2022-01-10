@@ -10,6 +10,7 @@ import { setUpEdgeCreationDropZone } from "../../edge/functions/setupEdgeCreatio
 import { FullyLinkedEvent } from "../../../event/FullyLinkedEvent";
 import { dispatchFullyLinkedEvent } from "../../../event/dispatchFullyLinkedEvent";
 import { FullyLinkedEventEnum } from "../../../..";
+import { FullyLinkedOptions } from "../../../options/FullyLinkedOptions";
 
 interface CreateEdgeOnAnchorDraggingParams<NodeType, EdgeType, GlobalNodePropsType> {
   anchorEndElem: HTMLDivElement;
@@ -24,6 +25,7 @@ interface CreateEdgeOnAnchorDraggingParams<NodeType, EdgeType, GlobalNodePropsTy
   nodeMapById: Map<string, ProcessedNode<NodeType, GlobalNodePropsType>>;
   edgeMapById: Map<string, Edge<EdgeType>>;
   edgeListMapByNodeId: Map<string, Edge<EdgeType>[]>;
+  options: FullyLinkedOptions<GlobalNodePropsType>;
 }
 
 /** When user drags an "end anchor" element, a new placeholder edge should be created.
@@ -41,6 +43,7 @@ export function setUpCreateEdgeOnAnchorDragging<NodeType, EdgeType, GlobalNodePr
   edgeMapById: edgesMapById,
   edgeListMapByNodeId: edgesMapByNodeId,
   nodeMapById: nodesMapById,
+  options
 }: CreateEdgeOnAnchorDraggingParams<NodeType, EdgeType, GlobalNodePropsType>) {
   // Positions
   let dragStartX: number;
@@ -82,9 +85,9 @@ export function setUpCreateEdgeOnAnchorDragging<NodeType, EdgeType, GlobalNodePr
         "path"
       );
       path.setAttribute("d", d);
-      path.setAttribute("stroke", "black");
-      path.setAttribute("stroke-width", "1");
-      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", options.defaultEdgeStyles?.stroke || "black");
+      path.setAttribute("stroke-width", (options.defaultEdgeStyles?.strokeWidth || 1).toString());
+      path.setAttribute("fill", options.defaultEdgeStyles?.fill ||"none");
       path.setAttribute("data-edge-id", edgePlaceholderId);
 
       // Set initial positions
@@ -178,6 +181,7 @@ export function setUpCreateEdgeOnAnchorDragging<NodeType, EdgeType, GlobalNodePr
     nodesMapById,
     edgesMapById,
     edgesMapByNodeId,
-    container
+    container,
+    options
   );
 }

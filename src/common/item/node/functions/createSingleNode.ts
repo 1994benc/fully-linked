@@ -84,7 +84,8 @@ export function createSingleNode<NodeType, EdgeType, GlobalNodePropsType>({
     container,
     nodesMapById,
     edgesMapById,
-    edgesMapByNodeId
+    edgesMapByNodeId,
+    options
   );
 
   innerContainer.appendChild(anchorStartElem);

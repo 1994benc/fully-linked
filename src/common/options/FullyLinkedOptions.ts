@@ -1,3 +1,5 @@
+import { EdgeStyles } from "../item/edge/types/Edge";
+
 export interface FullyLinkedOptions<GlobalNodePropsType> {
   /** The unique id of the FullyLinked graph. */
   id: string;
@@ -18,6 +20,8 @@ export interface FullyLinkedOptions<GlobalNodePropsType> {
   };
 
   globalNodeProps?: GlobalNodePropsType;
+
+  defaultEdgeStyles?: EdgeStyles;
 
   // TODO: zoomTo
 }

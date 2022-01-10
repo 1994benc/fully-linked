@@ -1,4 +1,5 @@
 import { Disposer } from "../../../disposer/Disposer";
+import { FullyLinkedOptions } from "../../../options/FullyLinkedOptions";
 import { CanvasZoomAndTransformMaintainer } from "../../canvas/stateMaintainers/CanvasZoomAndTransformMaintainer";
 import { CreateNewEdgeStateMaintainer } from "../../edge/stateMaintainers/CreateNewEdgeStateMaintainer";
 import { Edge } from "../../edge/types/Edge";
@@ -16,7 +17,8 @@ export function createLinkAnchorElement<NodeType, EdgeType, GlobalNodePropsType>
   container: HTMLElement,
   nodesMapById: Map<string, ProcessedNode<NodeType, GlobalNodePropsType>>,
   edgesMapById: Map<string, Edge<EdgeType>>,
-  edgesMapByNodeId: Map<string, Edge<EdgeType>[]>
+  edgesMapByNodeId: Map<string, Edge<EdgeType>[]>,
+  options: FullyLinkedOptions<GlobalNodePropsType>
 ): { anchorStartElem: HTMLElement; anchorEndElem: HTMLElement } {
   const anchorStartElem = document.createElement("div");
   const anchorEndElem = document.createElement("div");
@@ -57,6 +59,7 @@ export function createLinkAnchorElement<NodeType, EdgeType, GlobalNodePropsType>
     nodeMapById: nodesMapById,
     edgeMapById: edgesMapById,
     edgeListMapByNodeId: edgesMapByNodeId,
+    options: options
   });
   return { anchorStartElem, anchorEndElem };
 }

@@ -617,6 +617,10 @@ export class FullyLinked<NodeType, EdgeType, GlobalNodePropsType> {
       throw new Error("Container is not set or is undefined");
     }
 
+    if (!this._options) {
+      throw new Error("FullyLinkedOptions is not set");
+    }
+
     createSingleEdge({
       edge,
       internalSVGElement: this._internalSVGElement as SVGSVGElement,
@@ -625,6 +629,7 @@ export class FullyLinked<NodeType, EdgeType, GlobalNodePropsType> {
       edgesMapByNodeId: this._edgeListMapByNodeId,
       disposer: this._disposer,
       containerElement: this._container,
+      options: this._options,
     });
 
     this.setEdgeTargetAndSourceIsRootProperty(edge);
@@ -737,6 +742,9 @@ export class FullyLinked<NodeType, EdgeType, GlobalNodePropsType> {
       if (!this._container) {
         throw new Error("Container is not set");
       }
+      if (!this._options) {
+        throw new Error("FullyLinkedOptions is not set");
+      }
       createSingleEdge({
         edge,
         internalSVGElement: this._internalSVGElement,
@@ -745,6 +753,7 @@ export class FullyLinked<NodeType, EdgeType, GlobalNodePropsType> {
         edgesMapByNodeId: this._edgeListMapByNodeId,
         disposer: this._disposer,
         containerElement: this._container,
+        options: this._options,
       });
     }
   }

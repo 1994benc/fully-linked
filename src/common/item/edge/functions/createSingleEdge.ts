@@ -3,6 +3,7 @@ import { Disposer } from "../../../disposer/Disposer";
 import { addDisposableEventListener } from "../../../event/addEventListener";
 import { dispatchFullyLinkedEvent } from "../../../event/dispatchFullyLinkedEvent";
 import { FullyLinkedEvent } from "../../../event/FullyLinkedEvent";
+import { FullyLinkedOptions } from "../../../options/FullyLinkedOptions";
 import { ProcessedNode } from "../../node/types/Node";
 import { Edge } from "../types/Edge";
 import { getEdgeElement } from "./getEdgeElement";
@@ -16,6 +17,7 @@ interface SingleEdgeCreationParams<EdgeType, NodeType, GlobalNodePropsType> {
   edgesMapByNodeId: Map<string, Edge<EdgeType>[]>;
   disposer: Disposer;
   containerElement: HTMLElement;
+  options: FullyLinkedOptions<GlobalNodePropsType>;
 }
 
 export function createSingleEdge<NodeType, EdgeType, GlobalNodePropsType>({
@@ -26,6 +28,7 @@ export function createSingleEdge<NodeType, EdgeType, GlobalNodePropsType>({
   edgesMapByNodeId,
   disposer,
   containerElement,
+  options
 }: SingleEdgeCreationParams<EdgeType, NodeType, GlobalNodePropsType>): void {
   const sourceNode = nodesMapById.get(edge.source);
   const targetNode = nodesMapById.get(edge.target);
@@ -56,12 +59,12 @@ export function createSingleEdge<NodeType, EdgeType, GlobalNodePropsType>({
         "path"
       );
       path.setAttribute("d", d);
-      path.setAttribute("stroke", edge.styles?.stroke || "black");
+      path.setAttribute("stroke",  edge.styles?.stroke || options.defaultEdgeStyles?.stroke || "black");
       path.setAttribute(
         "stroke-width",
-        (edge.styles?.strokeWidth || 1).toString()
+        (edge.styles?.strokeWidth || options.defaultEdgeStyles?.strokeWidth || 1).toString()
       );
-      path.setAttribute("fill", edge.styles?.fill || "none");
+      path.setAttribute("fill", edge.styles?.fill || options.defaultEdgeStyles?.fill || "none");
       path.setAttribute("data-edge-id", edge.id);
       addDisposableEventListener(
         path,

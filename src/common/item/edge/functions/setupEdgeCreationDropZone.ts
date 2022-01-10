@@ -7,6 +7,7 @@ import { Edge } from "./../types/Edge";
 import { FullyLinkedEvent } from "../../../event/FullyLinkedEvent";
 import { dispatchFullyLinkedEvent } from "../../../event/dispatchFullyLinkedEvent";
 import { FullyLinkedEventEnum } from "../../../..";
+import { FullyLinkedOptions } from "../../../options/FullyLinkedOptions";
 
 export function setUpEdgeCreationDropZone<NodeType, EdgeType, GlobalNodePropsType>(
   anchorStartElem: HTMLDivElement,
@@ -17,7 +18,8 @@ export function setUpEdgeCreationDropZone<NodeType, EdgeType, GlobalNodePropsTyp
   nodesMapById: Map<string, ProcessedNode<NodeType, GlobalNodePropsType>>,
   edgesMapById: Map<string, Edge<EdgeType>>,
   edgesMapByNodeId: Map<string, Edge<EdgeType>[]>,
-  containerElement: HTMLElement
+  containerElement: HTMLElement,
+  options: FullyLinkedOptions<GlobalNodePropsType>
 ): void {
   addDisposableEventListener(
     anchorStartElem,
@@ -48,6 +50,7 @@ export function setUpEdgeCreationDropZone<NodeType, EdgeType, GlobalNodePropsTyp
             edgesMapByNodeId,
             disposer,
             containerElement,
+            options
           });
 
           // Dispatch an event that the edge has been fully created

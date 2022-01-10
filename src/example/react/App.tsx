@@ -27,6 +27,10 @@ export function App() {
         panX: 10,
         panY: -100,
         zoomLevel: 0.5,
+      },
+      defaultEdgeStyles: {
+        stroke: "purple",
+        strokeWidth: 4
       }
     });
 

@@ -30,8 +30,8 @@ export function App() {
       },
       defaultEdgeStyles: {
         stroke: "purple",
-        strokeWidth: 4
-      }
+        strokeWidth: 4,
+      },
     });
 
     // Set up any event listeners
@@ -83,12 +83,11 @@ export function App() {
     fl.on(FullyLinkedEventEnum.nodeDragEnd, (e) => {
       console.log("nodeDragEnd", e);
       console.log(fl?.getZoomLevel(), fl?.getCanvasZoomAndPan());
-
     });
 
     fl.on(FullyLinkedEventEnum.manualEdgeCreationStart, (e) => {
       console.log("manualEdgeCreationStart", e);
-    })
+    });
 
     fl.on(FullyLinkedEventEnum.manualEdgeCreationEndSuccessfully, (e) => {
       console.log("edgeCreated", e);
@@ -107,16 +106,37 @@ export function App() {
     });
   }
 
-  const changeData = (dataset: FullyLinkedData<MyNodeType, MyEdgeType, any>) => {
+  const changeData = (
+    dataset: FullyLinkedData<MyNodeType, MyEdgeType, any>
+  ) => {
     // Change data without recreating the entire FullyLinked graph
     // FullyLinked will internally figure out which items have changed and update them accordingly
     fullyLinkedInstance?.updateData(dataset);
+  };
+
+  const bfs = async () => {
+    await fullyLinkedInstance?.breadthFirstSearch(
+      fullyLinkedInstance?.getAllNodes()[0],
+      (node, elem) => {
+        console.log(node.id);
+        elem.style.border = "3px solid green";
+      },
+      (node, elem) => {
+        console.log(node.id);
+        elem.style.border = "none";
+      },
+      1000
+    );
+
+    console.log("done")
   };
 
   return (
     <div>
       <button onClick={() => changeData(datasetById.test_1)}>Data 1</button>
       <button onClick={() => changeData(datasetById.test_2)}>Data 2</button>
+
+      <button onClick={bfs}>Breadth first search</button>
 
       {/* The container for our FullyLinked graph is a div and has a ref prop set to graphContent */}
       <div

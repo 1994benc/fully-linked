@@ -27,6 +27,7 @@ import {
   moveCameraTo,
 } from "./common/item/canvas/functions/moveCameraTo";
 import * as d3 from "d3";
+import { bfs } from "./common/algorithms/bfs";
 const logger = Logger();
 
 const edgePlaceholderId = "placeholder-edge";
@@ -714,6 +715,35 @@ export class FullyLinked<NodeType, EdgeType, GlobalNodePropsType> {
         });
       }) as EventListener,
       this._disposer
+    );
+  }
+
+  /**
+   *
+   * @param startNode The node to start the search from
+   * @param onNodeVisit The callback to call when a node is visited
+   * @param afterNodeVisitDelay The callback to call after a node is visited
+   * @param waitDurationAfterNodeVisit The duration to wait after a node is visited
+   *
+   */
+  public async breadthFirstSearch(
+    startNode: Node<NodeType, GlobalNodePropsType>,
+    onNodeVisit?: (
+      node: Node<NodeType, GlobalNodePropsType>,
+      nodeElement: HTMLElement
+    ) => void,
+    afterNodeVisitDelay?: (
+      node: Node<NodeType, GlobalNodePropsType>,
+      nodeElement: HTMLElement
+    ) => void,
+    waitDurationAfterNodeVisit: number = 0
+  ): Promise<void> {
+    await bfs(
+      startNode,
+      this,
+      onNodeVisit,
+      afterNodeVisitDelay,
+      waitDurationAfterNodeVisit
     );
   }
 
